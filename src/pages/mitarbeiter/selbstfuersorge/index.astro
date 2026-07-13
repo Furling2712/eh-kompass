@@ -1,0 +1,45 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const angebote = (await getCollection('selbstfuersorge', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<BaseLayout title="Selbstfürsorge" noindex>
+  <div class="container prose article">
+    <h1>Selbstfürsorge</h1>
+    <p class="lead muted">
+      Meditative Angebote für zwischendurch – für einen achtsamen Umgang mit dir selbst im Arbeitsalltag.
+    </p>
+
+    <ul class="card-grid">
+      {
+        angebote.map((a) => (
+          <li class="card">
+            <h3>{a.data.title}</h3>
+            <p>{a.data.description}</p>
+            {a.data.audioUrl ? (
+              <audio controls src={a.data.audioUrl} style="width:100%">
+                Dein Browser unterstützt kein Audio-Element.
+              </audio>
+            ) : (
+              <span class="badge">Aufnahme folgt in Kürze</span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

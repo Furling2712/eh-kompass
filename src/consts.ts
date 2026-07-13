@@ -10,6 +10,7 @@ export const NAV_LINKS = [
   { href: '/glossar/', label: 'Glossar' },
   { href: '/tools/', label: 'Tools' },
   { href: '/vorlagen/', label: 'Vorlagen' },
+  { href: '/shop/', label: 'Shop' },
   { href: '/ueber-mich', label: 'Über mich' },
 ];
 

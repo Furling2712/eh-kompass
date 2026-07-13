@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /mitarbeiter/
 
 Sitemap: https://eh-kompass.de/sitemap-index.xml

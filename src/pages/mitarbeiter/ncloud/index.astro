@@ -1,0 +1,33 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+// TODO: echten Link zur nCloud eintragen.
+const NCLOUD_URL = '#';
+---
+
+<BaseLayout title="nCloud" noindex>
+  <div class="container prose article">
+    <h1>nCloud</h1>
+    <p class="lead muted">Zugang zur nCloud.</p>
+
+    <div class="notice">
+      <strong>Platzhalter</strong>
+      <p style="margin-bottom:0">
+        Trag den echten Link in <code>src/pages/mitarbeiter/ncloud/index.astro</code>
+        (Variable <code>NCLOUD_URL</code>) ein.
+      </p>
+    </div>
+
+    <p><a href={NCLOUD_URL} class="btn" target="_blank" rel="noopener">Zur nCloud →</a></p>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

@@ -1,0 +1,80 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { formulare } from '../../../data/formulare';
+---
+
+<BaseLayout title="Formulare" noindex>
+  <div class="container prose article" id="print-area">
+    <h1>Formulare</h1>
+    <p class="lead muted">Formular auswählen, ausfüllen und ausdrucken/als PDF speichern.</p>
+
+    <div class="notice no-print">
+      <strong>Platzhalter</strong>
+      <p style="margin-bottom:0">
+        Aktuell ist nur ein Beispiel-Formular hinterlegt. Weitere Formulare können in
+        <code>src/data/formulare.ts</code> ergänzt werden. Es wird nichts gespeichert – die Eingaben
+        bleiben nur im Browser, bis die Seite verlassen wird.
+      </p>
+    </div>
+
+    <div class="tool-box no-print">
+      <div class="field">
+        <label for="formular-auswahl">Formular</label>
+        <select id="formular-auswahl">
+          {formulare.map((f) => <option value={f.id}>{f.titel}</option>)}
+        </select>
+        <p class="small muted" id="formular-beschreibung" style="margin:.4rem 0 0"></p>
+      </div>
+    </div>
+
+    <form id="formular-felder" class="tool-box"></form>
+
+    <button type="button" id="drucken-btn" class="btn no-print">Drucken / als PDF speichern</button>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  @media print {
+    .no-print,
+    header,
+    footer {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+  import { formulare, type Formular } from '../../../data/formulare';
+
+  const auswahl = document.getElementById('formular-auswahl') as HTMLSelectElement;
+  const beschreibung = document.getElementById('formular-beschreibung') as HTMLParagraphElement;
+  const felderContainer = document.getElementById('formular-felder') as HTMLFormElement;
+  const druckenBtn = document.getElementById('drucken-btn') as HTMLButtonElement;
+
+  function renderFormular(f: Formular) {
+    beschreibung.textContent = f.beschreibung;
+    felderContainer.innerHTML = f.felder
+      .map((feld) => {
+        const input =
+          feld.typ === 'textarea'
+            ? `<textarea id="${feld.id}" name="${feld.id}" rows="4"></textarea>`
+            : `<input type="${feld.typ === 'datum' ? 'date' : 'text'}" id="${feld.id}" name="${feld.id}" />`;
+        return `<div class="field"><label for="${feld.id}">${feld.label}</label>${input}</div>`;
+      })
+      .join('');
+  }
+
+  function aktuellesFormular(): Formular {
+    return formulare.find((f) => f.id === auswahl.value) ?? formulare[0];
+  }
+
+  auswahl.addEventListener('change', () => renderFormular(aktuellesFormular()));
+  druckenBtn.addEventListener('click', () => window.print());
+
+  renderFormular(aktuellesFormular());
+</script>

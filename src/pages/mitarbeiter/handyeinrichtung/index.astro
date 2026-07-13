@@ -1,0 +1,34 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Handyeinrichtung" noindex>
+  <div class="container prose article">
+    <h1>Handyeinrichtung</h1>
+    <p class="lead muted">Schritt-für-Schritt-Anleitung fürs Diensthandy.</p>
+
+    <div class="notice">
+      <strong>Platzhalter</strong>
+      <p style="margin-bottom:0">
+        Trag hier die echten Schritte ein (z. B. E-Mail-Konto einrichten, benötigte Apps,
+        VPN/Zugänge).
+      </p>
+    </div>
+
+    <ol>
+      <li>Schritt 1: …</li>
+      <li>Schritt 2: …</li>
+      <li>Schritt 3: …</li>
+    </ol>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

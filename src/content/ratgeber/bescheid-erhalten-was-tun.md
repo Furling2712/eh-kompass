@@ -1,6 +1,6 @@
 ---
 title: 'Bescheid bekommen – was tun? Checkliste in 5 Schritten'
-description: 'Du hast einen Bescheid der Eingliederungshilfe erhalten und weißt nicht, was er bedeutet? Diese Checkliste führt dich ruhig durch die ersten Schritte.'
+description: 'Du hast einen Bescheid erhalten und weißt nicht, was er bedeutet? Diese Checkliste führt dich ruhig durch die ersten Schritte.'
 pubDate: 2026-07-01
 order: 1
 stand: 'Juli 2026'
@@ -8,7 +8,7 @@ quelle: 'https://www.gesetze-im-internet.de/sgg/__84.html'
 quelleLabel: '§ 84 SGG (Widerspruch)'
 ---
 
-Ein Bescheid vom Kostenträger sieht oft einschüchternd aus: viel Behördensprache, Paragrafen,
+Ein Bescheid von diversen Behörden sieht oft einschüchternd aus: viel Behördensprache, Paragrafen,
 manchmal eine Ablehnung oder weniger Leistung als erhofft. Atme kurz durch – und geh die folgenden
 fünf Schritte der Reihe nach durch.
 
@@ -25,8 +25,8 @@ diesem Zeitpunkt läuft in der Regel deine Widerspruchsfrist von einem Monat.
 Suche gezielt nach diesen Punkten:
 
 - **Was wurde entschieden?** Wird etwas bewilligt, abgelehnt oder verändert?
-- **In welchem Umfang?** Zum Beispiel Fachleistungsstunden pro Woche oder ein bestimmtes
-  Wohnsetting.
+- **In welchem Umfang?** Zum Beispiel Fachleistungsstunden pro Woche im BeWo oder ein bestimmtes
+  Wohnsetting oder Zahlung zur Sicherung Ihres Lebensunterhalts?
 - **Ab wann und wie lange** gilt die Entscheidung?
 - **Die Begründung:** Warum wurde so entschieden?
 
@@ -47,7 +47,8 @@ Du bist mit der Entscheidung nicht einverstanden? Dann kannst du **Widerspruch**
 zunächst nichts Dramatisches – es bedeutet nur, dass die Entscheidung noch einmal geprüft wird.
 
 Wichtig: Der Widerspruch muss **fristgerecht** und am besten **schriftlich** eingehen. Eine
-ausführliche Begründung kannst du auch später nachreichen – kündige das im Schreiben an.
+ausführliche Begründung kannst du auch später nachreichen – kündige das im Schreiben an. Trage dir 
+den Termin am besten im Kalender ein, damit du ihn nicht verpasst!
 
 > Unser [Muster-Widerspruch-Generator](/tools/widerspruch-generator) hilft dir, einen Entwurf zu
 > formulieren, den du selbst anpasst und einreichst.
@@ -58,7 +59,7 @@ Du musst das nicht allein machen. Kostenlose, unabhängige Anlaufstellen sind zu
 
 - **EUTB** – Ergänzende unabhängige Teilhabeberatung (bundesweit, kostenlos)
 - **Sozialverbände** wie VdK oder SoVD
-- deine **Leistungserbringer** (z. B. der Träger deines Betreuten Wohnens)
+- deine **Leistungserbringer** (z. B. dein Betreuer des Betreuten Wohnens)
 - bei rechtlichen Fragen: ein **Fachanwalt für Sozialrecht**
 
 ## Zusammengefasst

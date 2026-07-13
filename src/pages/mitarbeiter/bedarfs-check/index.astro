@@ -1,0 +1,78 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { fragen } from '../../../data/bedarfs-check';
+---
+
+<BaseLayout title="Bedarfs-Check" noindex>
+  <div class="container prose article">
+    <h1>Bedarfs-Check</h1>
+    <p class="lead muted">
+      Kurze Orientierung, welche Leistungen für einen Klienten infrage kommen könnten.
+    </p>
+
+    <div class="notice">
+      <strong>Platzhalter-Logik</strong>
+      <p style="margin-bottom:0">
+        Die Fragen und die Zuordnung zu Leistungen in
+        <code>src/data/bedarfs-check.ts</code> sind Beispiele, keine geprüfte Fachlogik. Bitte
+        durch echtes Fachwissen ersetzen, bevor das im echten Betrieb genutzt wird.
+      </p>
+    </div>
+
+    <div class="tool-box">
+      <form id="bedarfs-form">
+        {
+          fragen.map((f) => (
+            <div class="field">
+              <label for={f.id}>{f.text}</label>
+              <select id={f.id} name={f.id} data-frage>
+                {f.optionen.map((o) => (
+                  <option value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+          ))
+        }
+        <button type="submit" class="btn">Auswerten</button>
+      </form>
+
+      <div id="bedarfs-ergebnis" class="result" hidden aria-live="polite"></div>
+    </div>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>
+
+<script>
+  import { leistungen } from '../../../data/bedarfs-check';
+
+  const form = document.getElementById('bedarfs-form') as HTMLFormElement;
+  const out = document.getElementById('bedarfs-ergebnis') as HTMLDivElement;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const selects = Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-frage]'));
+    const antworten: Record<string, string> = {};
+    for (const s of selects) antworten[s.name] = s.value;
+
+    const treffer = leistungen.filter((l) => l.passtZu(antworten));
+
+    out.hidden = false;
+    out.innerHTML =
+      treffer.length > 0
+        ? `<p style="margin:0 0 .5rem">Mögliche Leistungen:</p>
+           <ul style="margin:.5rem 0 0">
+             ${treffer.map((l) => `<li><strong>${l.name}</strong> – ${l.beschreibung}</li>`).join('')}
+           </ul>`
+        : '<p style="margin:0">Auf Basis dieser Antworten wurde keine passende Leistung gefunden.</p>';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+</script>

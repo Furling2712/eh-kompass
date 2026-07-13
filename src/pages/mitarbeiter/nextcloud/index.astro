@@ -1,0 +1,33 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+// TODO: echten Link zum Nextcloud-Dashboard eintragen.
+const NEXTCLOUD_URL = '#';
+---
+
+<BaseLayout title="Nextcloud (Dashboard)" noindex>
+  <div class="container prose article">
+    <h1>Nextcloud (Dashboard)</h1>
+    <p class="lead muted">Zugang zum Nextcloud-Dashboard.</p>
+
+    <div class="notice">
+      <strong>Platzhalter</strong>
+      <p style="margin-bottom:0">
+        Trag den echten Link in <code>src/pages/mitarbeiter/nextcloud/index.astro</code>
+        (Variable <code>NEXTCLOUD_URL</code>) ein.
+      </p>
+    </div>
+
+    <p><a href={NEXTCLOUD_URL} class="btn" target="_blank" rel="noopener">Zur Nextcloud →</a></p>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

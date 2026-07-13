@@ -2,6 +2,7 @@
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Helper from '../components/Helper.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -23,6 +24,8 @@ const {
 const pageTitle = title ? `${title} — ${SITE_TITLE}` : `${SITE_TITLE} — ${SITE_DESCRIPTION}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href;
 const ogImage = new URL(image, Astro.site ?? Astro.url.origin).href;
+// Der Navigations-Begleiter ist nur für die öffentliche Seite gedacht, nicht für den Mitarbeiterbereich.
+const showHelper = !Astro.url.pathname.startsWith('/mitarbeiter');
 ---
 
 <!doctype html>
@@ -57,5 +60,6 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin).href;
       <slot />
     </main>
     <Footer />
+    {showHelper && <Helper />}
   </body>
 </html>

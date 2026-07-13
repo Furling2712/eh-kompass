@@ -1,0 +1,41 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+// TODO: Video-Link eintragen, sobald vorhanden.
+const VIDEO_URL = '';
+---
+
+<BaseLayout title="BeWo-Doku-Erklärvideo" noindex>
+  <div class="container prose article">
+    <h1>BeWo-Doku-Erklärvideo</h1>
+    <p class="lead muted">Kurzes Video zur Dokumentation im Betreuten Wohnen.</p>
+
+    {
+      VIDEO_URL ? (
+        <p>
+          <a href={VIDEO_URL} target="_blank" rel="noopener" class="btn">
+            Video ansehen ↗
+          </a>
+        </p>
+      ) : (
+        <div class="notice">
+          <strong>Video folgt in Kürze</strong>
+          <p style="margin-bottom:0">
+            Trag den Link in <code>src/pages/mitarbeiter/bewo-doku/index.astro</code> (Variable
+            <code>VIDEO_URL</code>) ein, sobald das Video fertig ist.
+          </p>
+        </div>
+      )
+    }
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

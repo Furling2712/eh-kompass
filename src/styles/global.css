@@ -9,6 +9,9 @@
   --color-border: #dde3e8;
   --color-warning-bg: #fff8e6;
   --color-warning-border: #f0d27a;
+  --color-pflicht: #2e7d32;
+  --color-pflicht-bg: #eaf6ec;
+  --color-pflicht-border: #a3d9ab;
   --radius: 10px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
   --maxw: 72rem;
@@ -21,10 +24,12 @@
 }
 
 html {
+  /* Etwas größere Basisschrift (~18px statt 16px) für bessere Lesbarkeit. */
+  font-size: 112.5%;
   font-family: var(--font);
   color: var(--color-text);
   background: var(--color-bg);
-  line-height: 1.65;
+  line-height: 1.7;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
@@ -135,7 +140,8 @@ th {
   display: inline-block;
   background: var(--color-primary);
   color: #fff;
-  padding: 0.7rem 1.4rem;
+  padding: 0.85rem 1.6rem;
+  min-height: 2.75rem;
   border-radius: var(--radius);
   text-decoration: none;
   font-weight: 600;
@@ -165,8 +171,8 @@ th {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  gap: 1.25rem;
-  margin: 1.5rem 0;
+  gap: 1.75rem;
+  margin: 2rem 0;
   padding: 0;
   list-style: none;
 }
@@ -175,7 +181,7 @@ th {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1.4rem;
+  padding: 1.75rem;
   box-shadow: var(--shadow);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   display: flex;
@@ -200,6 +206,16 @@ th {
   text-decoration: none;
 }
 
+.card-pflicht {
+  background: var(--color-pflicht-bg);
+  border-color: var(--color-pflicht-border);
+}
+
+.card-pflicht .badge {
+  background: var(--color-pflicht);
+  color: #fff;
+}
+
 /* Formulare / Tools */
 .tool-box {
   background: var(--color-surface);
@@ -219,7 +235,8 @@ input,
 select,
 textarea {
   width: 100%;
-  padding: 0.6rem 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.85rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   font-size: 1rem;
@@ -237,7 +254,7 @@ textarea:focus {
 }
 
 .field {
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.4rem;
 }
 
 .result {

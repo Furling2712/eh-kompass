@@ -1,0 +1,130 @@
+---
+import { findHelperTip } from '../data/helper-tips';
+
+const tip = findHelperTip(Astro.url.pathname);
+---
+
+<div class="helper" id="eh-helper" data-open="false">
+  <button
+    type="button"
+    id="eh-helper-toggle"
+    class="helper-toggle"
+    aria-expanded="false"
+    aria-controls="eh-helper-panel"
+  >
+    <span aria-hidden="true">💬</span>
+    <span class="visually-hidden">Hilfe zur Navigation öffnen</span>
+  </button>
+
+  <div id="eh-helper-panel" class="helper-panel" role="dialog" aria-label="Navigationshilfe" hidden>
+    <button type="button" id="eh-helper-close" class="helper-close" aria-label="Schließen">✕</button>
+    <p>{tip.message}</p>
+    {
+      tip.links && (
+        <ul class="helper-links">
+          {tip.links.map((l) => (
+            <li>
+              <a href={l.href}>{l.label} →</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .helper {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 100;
+  }
+
+  .helper-toggle {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    display: grid;
+    place-items: center;
+  }
+
+  .helper-toggle:hover {
+    background: var(--color-primary-dark);
+  }
+
+  .helper-panel {
+    position: absolute;
+    right: 0;
+    bottom: 4rem;
+    width: min(20rem, 85vw);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.4rem;
+  }
+
+  .helper-panel p {
+    margin: 0 0 0.5rem;
+  }
+
+  .helper-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--color-muted);
+    padding: 0.35rem;
+    line-height: 1;
+  }
+
+  .helper-links {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+  }
+
+  .helper-links li + li {
+    margin-top: 0.4rem;
+  }
+
+  @media (max-width: 480px) {
+    .helper {
+      right: 1rem;
+      bottom: 1rem;
+    }
+  }
+</style>
+
+<script>
+  const root = document.getElementById('eh-helper') as HTMLDivElement;
+  const toggle = document.getElementById('eh-helper-toggle') as HTMLButtonElement;
+  const panel = document.getElementById('eh-helper-panel') as HTMLDivElement;
+  const closeBtn = document.getElementById('eh-helper-close') as HTMLButtonElement;
+
+  const STORAGE_KEY = 'eh-helper-open';
+
+  function setOpen(open: boolean) {
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    root.dataset.open = String(open);
+    localStorage.setItem(STORAGE_KEY, open ? '1' : '0');
+  }
+
+  toggle.addEventListener('click', () => setOpen(panel.hidden));
+  closeBtn.addEventListener('click', () => setOpen(false));
+
+  if (localStorage.getItem(STORAGE_KEY) === '1') {
+    setOpen(true);
+  }
+</script>

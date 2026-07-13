@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { produkte } from '../../data/shop-produkte';
+---
+
+<BaseLayout
+  title="Shop"
+  description="Systemtherapeutische Methoden und Materialien für die Eingliederungshilfe."
+>
+  <div class="container prose article">
+    <h1>Shop</h1>
+    <p class="lead muted">
+      Systemtherapeutische Methoden und Materialien für die Eingliederungshilfe – von unserem
+      Systemiker.
+    </p>
+
+    <div class="notice">
+      <strong>Im Aufbau</strong>
+      <p style="margin-bottom:0">
+        Die Produkte hier sind Platzhalter. Echte Angebote, Preise und Checkout-Links kommen, sobald
+        das Material fertig ist.
+      </p>
+    </div>
+
+    <ul class="card-grid">
+      {
+        produkte.map((p) => (
+          <li class="card">
+            <h3>{p.titel}</h3>
+            <p>{p.beschreibung}</p>
+            <p class="small muted">Von: {p.anbieter}</p>
+            <p class="price" style="font-size:1.2rem">{p.preis}</p>
+            <a href={p.checkoutUrl} class="btn">
+              Ansehen
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

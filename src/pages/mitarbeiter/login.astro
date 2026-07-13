@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { COOKIE_NAME, SESSION_TTL_SECONDS, createSessionCookieValue, verifyPassword } from '../../lib/auth';
+
+const next = Astro.url.searchParams.get('next') ?? '/mitarbeiter/';
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const password = String(form.get('password') ?? '');
+
+  if (verifyPassword(password)) {
+    Astro.cookies.set(COOKIE_NAME, createSessionCookieValue(), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: import.meta.env.PROD,
+      path: '/',
+      maxAge: SESSION_TTL_SECONDS,
+    });
+    return Astro.redirect(next);
+  }
+
+  error = 'Falsches Passwort.';
+}
+---
+
+<BaseLayout title="Mitarbeiter-Login" noindex>
+  <div class="container prose article">
+    <h1>Mitarbeiter-Login</h1>
+    <p class="lead muted">Interner Bereich – nur für Mitarbeiter.</p>
+
+    <form method="POST" class="login-form">
+      <label for="password">Passwort</label>
+      <input type="password" id="password" name="password" required autofocus />
+      <button type="submit" class="btn">Anmelden</button>
+      {error && <p class="error">{error}</p>}
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+    max-width: 24rem;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .login-form input {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+  .error {
+    color: #b3261e;
+    margin: 0;
+  }
+</style>

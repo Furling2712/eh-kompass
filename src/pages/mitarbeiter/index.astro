@@ -1,0 +1,144 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const pflichtBereiche = [
+  {
+    href: '/mitarbeiter/onboarding/',
+    title: 'Onboarding',
+    desc: 'Einstieg für neue Mitarbeiter: Ablauf, wichtigste Systeme, erste Schritte.',
+  },
+  {
+    href: '/mitarbeiter/videos/',
+    title: 'BEI-Erklärvideos',
+    desc: 'Kurze Videos, die das BEI-Verfahren Schritt für Schritt erklären.',
+  },
+  {
+    href: '/mitarbeiter/nextcloud/',
+    title: 'Nextcloud (Dashboard)',
+    desc: 'Zugang zum Nextcloud-Dashboard.',
+  },
+  {
+    href: '/mitarbeiter/ncloud/',
+    title: 'nCloud',
+    desc: 'Zugang zur nCloud.',
+  },
+  {
+    href: '/mitarbeiter/bewo-doku/',
+    title: 'BeWo-Doku-Erklärvideo',
+    desc: 'Kurzes Video zur Dokumentation im Betreuten Wohnen.',
+  },
+  {
+    href: '/mitarbeiter/handyeinrichtung/',
+    title: 'Handyeinrichtung',
+    desc: 'Schritt-für-Schritt-Anleitung fürs Diensthandy.',
+  },
+];
+
+const optionaleBereiche = [
+  {
+    href: '/mitarbeiter/bedarfs-check/',
+    title: 'Bedarfs-Check',
+    desc: 'Kleine Abfrage: Was steht Klienten zu, was können sie beantragen?',
+  },
+  {
+    href: '/mitarbeiter/formulare/',
+    title: 'Formulare erstellen',
+    desc: 'Formulare für die tägliche Arbeit direkt online ausfüllen und drucken.',
+  },
+  {
+    href: '/mitarbeiter/erfahrungsschatz/',
+    title: 'Erfahrungsschatz & Best Practices',
+    desc: 'Praxiswissen aus dem Team für neue und erfahrene Kollegen.',
+  },
+  {
+    href: '/mitarbeiter/selbstfuersorge/',
+    title: 'Selbstfürsorge',
+    desc: 'Meditative Angebote für zwischendurch im Arbeitsalltag.',
+  },
+];
+---
+
+<BaseLayout title="Mitarbeiterbereich" noindex>
+  <div class="container prose article">
+    <h1>Mitarbeiterbereich</h1>
+    <p class="lead muted">Interner Bereich für PerSeh-Mitarbeiter.</p>
+
+    <a href="/mitarbeiter/systemtherapie/" class="card card-featured">
+      <span class="badge">Im Aufbau</span>
+      <h2>Systemtherapeutische Methoden für die Eingliederungshilfe</h2>
+      <p>
+        Systemtherapeutische Ansätze für die Arbeit mit Klienten, inklusive Verweis auf den Shop
+        unseres Systemikers.
+      </p>
+      <span class="btn">Öffnen</span>
+    </a>
+
+    <h2>Pflichtbereiche</h2>
+    <p class="small muted">Diese Bereiche sind für alle Mitarbeiter verpflichtend.</p>
+    <ul class="card-grid">
+      {
+        pflichtBereiche.map((b) => (
+          <li class="card card-pflicht">
+            <span class="badge">Pflicht</span>
+            <h3>
+              <a href={b.href} class="card-link">
+                {b.title}
+              </a>
+            </h3>
+            <p>{b.desc}</p>
+            <a href={b.href} class="btn btn-secondary">
+              Öffnen
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2>Optional – zum Nachschlagen</h2>
+    <p class="small muted">Diese Bereiche sind freiwillig und können bei Bedarf genutzt werden.</p>
+    <ul class="card-grid">
+      {
+        optionaleBereiche.map((b) => (
+          <li class="card">
+            <h3>
+              <a href={b.href} class="card-link">
+                {b.title}
+              </a>
+            </h3>
+            <p>{b.desc}</p>
+            <a href={b.href} class="btn btn-secondary">
+              Öffnen
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <form method="POST" action="/mitarbeiter/logout">
+      <button type="submit" class="btn btn-secondary">Abmelden</button>
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  form {
+    margin-top: 1rem;
+  }
+  .card-featured {
+    display: block;
+    margin: 1.5rem 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card-featured h2 {
+    margin-top: 0.75rem;
+  }
+  .card-featured .btn {
+    margin-top: 0.5rem;
+  }
+</style>

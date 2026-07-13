@@ -1,0 +1,65 @@
+---
+export const prerender = false;
+
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const eintraege = (await getCollection('onboarding', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+const gerendert = await Promise.all(eintraege.map((e) => render(e)));
+---
+
+<BaseLayout title="Onboarding" noindex>
+  <div class="container prose article">
+    <h1>Onboarding</h1>
+    <p class="lead muted">
+      Einstieg für neue Mitarbeiter – Schritt für Schritt. Diese Seite wird laufend ergänzt.
+    </p>
+
+    <ol class="onboarding-steps">
+      {
+        eintraege.map((e, i) => {
+          const { Content } = gerendert[i];
+          return (
+            <li>
+              <h2>{e.data.title}</h2>
+              <p class="small muted">{e.data.description}</p>
+              <div class="step-content">
+                <Content />
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .onboarding-steps {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .onboarding-steps > li {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.6rem;
+  }
+  .onboarding-steps h2 {
+    margin-top: 0;
+  }
+  .step-content {
+    margin-top: 0.75rem;
+  }
+</style>

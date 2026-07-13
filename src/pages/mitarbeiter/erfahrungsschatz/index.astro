@@ -1,0 +1,56 @@
+---
+export const prerender = false;
+
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const eintraege = (await getCollection('erfahrungsschatz', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+const gerendert = await Promise.all(eintraege.map((e) => render(e)));
+---
+
+<BaseLayout title="Erfahrungsschatz" noindex>
+  <div class="container prose article">
+    <h1>Erfahrungsschatz &amp; Best Practices</h1>
+    <p class="lead muted">
+      Praxiswissen aus dem Team – Dinge, die sich bewährt haben und neuen Kollegen helfen.
+    </p>
+
+    <ul class="erfahrung-list">
+      {
+        eintraege.map((e, i) => {
+          const { Content } = gerendert[i];
+          return (
+            <li class="card">
+              <h2>{e.data.title}</h2>
+              <p class="small muted">{e.data.description}</p>
+              <div class="prose">
+                <Content />
+              </div>
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .erfahrung-list {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .erfahrung-list h2 {
+    margin-top: 0;
+  }
+</style>

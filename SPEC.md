@@ -29,7 +29,7 @@ Rechtsblog-Texte wie bei bestehenden Seiten (assistenzplus.de, ksl-nrw.de, betan
 |---|---|---|
 | Framework | Astro (Content Islands, MDX) | Sehr SEO-/Performance-freundlich, Markdown-Content direkt im Repo, interaktive Tools nur dort wo nötig als React/Vanilla-JS-Island |
 | Hosting | Vercel oder Netlify (Free Tier) | Kostenlos für den Start, automatisches Deployment aus Git |
-| Interaktive Tools | Client-seitiges JS, keine Server-Persistenz | Keine Nutzerdaten-Speicherung nötig → datenschutzfreundlich, kein Server-Backend nötig |
+| Interaktive Tools | Client-seitiges JS, keine Server-Persistenz | Keine Nutzerdaten-Speicherung nötig → datenschutzfreundlich, kein Server-Backend nötig (gilt weiterhin für alle öffentlichen Seiten, siehe Abschnitt 11) |
 | Werbung | Google AdSense (später ggf. Ezoic ab genug Traffic) | Standard-Einstieg, Ezoic/Mediavine erst ab relevantem Traffic sinnvoll |
 | Digitalprodukte | Lemonsqueezy oder Gumroad (Checkout-Link/Embed) | Kein eigenes Payment-System nötig, automatisierter Verkauf |
 | Analytics | Plausible oder Simple Analytics | DSGVO-freundlich, kein Cookie-Banner-Zwang (im Gegensatz zu Google Analytics) |
@@ -129,3 +129,28 @@ Sitemap.xml, robots.txt, Meta-Tags, strukturierte Daten (Schema.org), AdSense-In
    Deployment-Pipeline, Basis-Layout."*
 3. Domain registrieren, Vercel/Netlify verbinden
 4. Phase für Phase abarbeiten (Abschnitt 8)
+
+## 11. Architektur-Update: Mitarbeiterbereich (Juli 2026)
+
+Diese Datei ging ursprünglich davon aus, dass die gesamte Seite backend-frei bleibt (siehe Abschnitt 3
+und 1). Das gilt weiterhin uneingeschränkt für alle **öffentlichen** Seiten (Ratgeber, Glossar, Tools,
+Vorlagen etc.) — sie bleiben vollständig statisch vorgerendert, speichern keine Nutzerdaten und
+brauchen keinen Server.
+
+Neu dazugekommen ist ein **interner, passwortgeschützter Mitarbeiterbereich** unter `/mitarbeiter/*`
+für Kollegen im Verein — ein bewusster, punktueller Ausnahmefall vom „kein Backend"-Grundsatz, nicht
+dessen Aufgabe:
+
+- Ermöglicht durch den `@astrojs/netlify`-Adapter; `output` bleibt `static`, nur die `/mitarbeiter/*`-Seiten
+  setzen einzeln `export const prerender = false`.
+- Login: ein gemeinsames Passwort für alle Mitarbeiter (kein Einzel-Account-System), gehasht (scrypt) in
+  einer Umgebungsvariable gespeichert. Sitzung: signierter, zustandsloser Cookie (HMAC) — keine Datenbank,
+  kein externer Auth-Anbieter.
+- **Phase 0 (aktuell umgesetzt):** nur das technische Grundgerüst — Login, Logout, geschützte
+  Platzhalter-Startseite. Die eigentlichen Inhalte (Onboarding-Hub, Formular-Erstellung,
+  BEI-Erklärvideos, Bedarfs-Check-Abfrage) sind bewusst noch nicht gebaut, das ist die nächste Phase.
+- **Online-BeWo (separates, späteres Vorhaben):** ein perspektivisch monetarisierter, klientenseitiger
+  Bereich mit echten Nutzerdaten (Dokumente bearbeiten, Einzel-Accounts) wurde bei der Architektur
+  mitgedacht, aber bewusst **nicht jetzt** umgesetzt. Dafür braucht es dann eine echte Datenbank/einen
+  echten Auth-Anbieter (z. B. Supabase) sowie eine gesonderte Prüfung der Sozialgeheimnis-/SGB-Pflichten —
+  diese Entscheidung sollte erst getroffen werden, wenn Online-BeWo konkret angegangen wird, nicht vorher.
