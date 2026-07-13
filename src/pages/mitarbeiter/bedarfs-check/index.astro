@@ -3,28 +3,54 @@ export const prerender = false;
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { fragen } from '../../../data/bedarfs-check';
+
+const betreuungsfragen = fragen.filter((f) => (f.kategorie ?? 'betreuung') === 'betreuung');
+const leistungsfragen = fragen.filter((f) => f.kategorie === 'leistungen');
 ---
 
 <BaseLayout title="Bedarfs-Check" noindex>
   <div class="container prose article">
-    <h1>Bedarfs-Check</h1>
+    <h1 id="seiten-titel">Bedarfs-Check</h1>
     <p class="lead muted">
-      Kurze Orientierung, welche Leistungen für einen Klienten infrage kommen könnten.
+      Kurze Orientierung, welche Leistungen und Ansprüche für einen Klienten infrage kommen könnten
+      – von der Betreuungsleistung bis zu oft übersehenen Geldleistungen wie Wohngeld, Mehrbedarfen
+      oder Pflegegrad.
     </p>
 
     <div class="notice">
-      <strong>Platzhalter-Logik</strong>
+      <strong>Platzhalter-Logik, keine Rechtsberatung</strong>
       <p style="margin-bottom:0">
-        Die Fragen und die Zuordnung zu Leistungen in
-        <code>src/data/bedarfs-check.ts</code> sind Beispiele, keine geprüfte Fachlogik. Bitte
-        durch echtes Fachwissen ersetzen, bevor das im echten Betrieb genutzt wird.
+        Die Fragen und die Zuordnung zu Leistungen in <code>src/data/bedarfs-check.ts</code> sind ein
+        Entwurf auf Basis von allgemeinem BEI_NRW-/EGH-Wissen und einer Internetrecherche (Stand 2026),
+        keine geprüfte Fachlogik und keine Rechtsberatung. Euro-Beträge und Prozentsätze ändern sich
+        regelmäßig – im Zweifel immer beim zuständigen Amt/Jobcenter nachfragen. Bitte durch echtes
+        Fachwissen ersetzen/prüfen, bevor das im echten Betrieb genutzt wird.
       </p>
     </div>
 
     <div class="tool-box">
+      <p class="small muted" style="margin-top:0">
+        Optional: eine bei PerSeh exportierte JSON-Datei importieren, um die Klientendaten während der
+        Bearbeitung als Kontext griffbereit zu haben.
+      </p>
+      <div class="field">
+        <label for="perseh-import">PerSeh-Export importieren (JSON)</label>
+        <input type="file" id="perseh-import" accept="application/json,.json" />
+        <p class="small muted" style="margin:.4rem 0 0">
+          Die Datei wird ausschließlich lokal in deinem Browser gelesen – nichts wird hochgeladen oder
+          gespeichert. Die PerSeh-Akte enthält keine strukturierten Angaben zu Einkommen, Kindern oder
+          Pflegebedarf, deshalb werden die Fragen unten nicht automatisch beantwortet, sondern nur mit
+          dem passenden Aktenauszug daneben angezeigt.
+        </p>
+      </div>
+      <div id="perseh-kontext" class="perseh-kontext" hidden></div>
+    </div>
+
+    <div class="tool-box">
       <form id="bedarfs-form">
+        <h2>Betreuung &amp; Alltag</h2>
         {
-          fragen.map((f) => (
+          betreuungsfragen.map((f) => (
             <div class="field">
               <label for={f.id}>{f.text}</label>
               <select id={f.id} name={f.id} data-frage>
@@ -32,9 +58,30 @@ import { fragen } from '../../../data/bedarfs-check';
                   <option value={o.value}>{o.label}</option>
                 ))}
               </select>
+              <p class="small muted kontext-hinweis" data-kontext-fuer={f.id} hidden></p>
             </div>
           ))
         }
+
+        <h2>Geldleistungen &amp; Ansprüche</h2>
+        <p class="small muted" style="margin-top:0">
+          Diese Fragen zielen auf Leistungen, die oft nicht direkt mit Eingliederungshilfe in
+          Verbindung gebracht, aber häufig übersehen werden.
+        </p>
+        {
+          leistungsfragen.map((f) => (
+            <div class="field">
+              <label for={f.id}>{f.text}</label>
+              <select id={f.id} name={f.id} data-frage>
+                {f.optionen.map((o) => (
+                  <option value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              <p class="small muted kontext-hinweis" data-kontext-fuer={f.id} hidden></p>
+            </div>
+          ))
+        }
+
         <button type="submit" class="btn">Auswerten</button>
       </form>
 
@@ -49,6 +96,32 @@ import { fragen } from '../../../data/bedarfs-check';
   .article {
     padding-block: 2.5rem 1rem;
   }
+  .tool-box h2 {
+    margin-top: 0;
+  }
+  .perseh-kontext {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .perseh-kontext h3 {
+    margin: 0 0 0.25rem;
+    font-size: 0.95rem;
+  }
+  .perseh-kontext p {
+    margin: 0;
+    white-space: pre-wrap;
+  }
+  .kontext-hinweis {
+    margin: 0.35rem 0 0;
+    padding: 0.5rem 0.7rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+  }
 </style>
 
 <script>
@@ -56,6 +129,9 @@ import { fragen } from '../../../data/bedarfs-check';
 
   const form = document.getElementById('bedarfs-form') as HTMLFormElement;
   const out = document.getElementById('bedarfs-ergebnis') as HTMLDivElement;
+  const importInput = document.getElementById('perseh-import') as HTMLInputElement;
+  const kontextBox = document.getElementById('perseh-kontext') as HTMLDivElement;
+  const seitenTitel = document.getElementById('seiten-titel') as HTMLHeadingElement;
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -68,11 +144,101 @@ import { fragen } from '../../../data/bedarfs-check';
     out.hidden = false;
     out.innerHTML =
       treffer.length > 0
-        ? `<p style="margin:0 0 .5rem">Mögliche Leistungen:</p>
+        ? `<p style="margin:0 0 .5rem">Mögliche Leistungen/Ansprüche:</p>
            <ul style="margin:.5rem 0 0">
              ${treffer.map((l) => `<li><strong>${l.name}</strong> – ${l.beschreibung}</li>`).join('')}
            </ul>`
         : '<p style="margin:0">Auf Basis dieser Antworten wurde keine passende Leistung gefunden.</p>';
     out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  // --- PerSeh-JSON-Import: rein clientseitig, nichts wird hochgeladen. ---
+  // Die PerSeh-Akte enthält v. a. Freitext (Hilfeplan-Angaben), keine strukturierten
+  // Daten zu Einkommen/Kindern/Pflegebedarf. Deshalb werden hier keine Antworten
+  // automatisch geraten - stattdessen wird der passende Aktenauszug neben der
+  // jeweiligen Frage angezeigt, damit Mitarbeitende schneller informiert antworten können.
+
+  function get(obj: unknown, path: string[]): string | undefined {
+    let d: any = obj;
+    for (const key of path) {
+      if (d && typeof d === 'object' && key in d) {
+        d = d[key];
+      } else {
+        return undefined;
+      }
+    }
+    return typeof d === 'string' && d.trim() ? d.trim() : undefined;
+  }
+
+  function setzeKontext(frageId: string, text: string | undefined) {
+    const el = document.querySelector<HTMLParagraphElement>(`[data-kontext-fuer="${frageId}"]`);
+    if (!el) return;
+    if (text) {
+      el.textContent = `Aus der Akte: „${text}"`;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  }
+
+  importInput.addEventListener('change', async () => {
+    const file = importInput.files?.[0];
+    if (!file) return;
+
+    let data: any;
+    try {
+      data = JSON.parse(await file.text());
+    } catch {
+      kontextBox.hidden = false;
+      kontextBox.innerHTML = '<p><strong>Konnte die Datei nicht lesen.</strong> Ist es eine gültige PerSeh-JSON-Exportdatei?</p>';
+      return;
+    }
+
+    const vorname = get(data, ['personal_information', 'Vorname']);
+    const nachname = get(data, ['personal_information', 'Nachname']);
+    const familienstand = get(data, ['personal_information', 'Familienstand']);
+    const behinderung = get(data, ['personal_information', 'Behinderung']);
+
+    if (vorname || nachname) {
+      seitenTitel.textContent = `Bedarfs-Check – ${[vorname, nachname].filter(Boolean).join(' ')}`;
+    }
+
+    const eckdaten = [
+      familienstand && `Familienstand laut Akte: ${familienstand}`,
+      behinderung && `Behinderung laut Akte: ${behinderung}`,
+    ].filter(Boolean);
+
+    const freitextFelder: { titel: string; pfad: string[] }[] = [
+      { titel: 'Wie und wo ich jetzt lebe', pfad: ['personal_view', 'Wie und wo ich jetzt lebe'] },
+      { titel: 'Was ich nicht so gut kann und ändern möchte', pfad: ['personal_view', 'Was ich nicht so gut kann und ändern möchte'] },
+      { titel: 'Ergänzende Sicht (Mitarbeiter/in)', pfad: ['mitarbeitersicht', 'Ergänzende Sicht zur persönlichen Situation'] },
+      { titel: 'Psychische Diagnosen (Tagesstruktur-Angaben)', pfad: ['tagesstruktur', 'psychdiag'] },
+      { titel: 'Sozialverhalten (Tagesstruktur-Angaben)', pfad: ['tagesstruktur', 'sozverhalten'] },
+      { titel: 'Unterstützungsbedarf (Tagesstruktur-Angaben)', pfad: ['tagesstruktur', 'unterstuetzungsbedarf'] },
+      { titel: 'Barrieren (Tagesstruktur-Angaben)', pfad: ['tagesstruktur', 'barrieren'] },
+    ];
+
+    const gefundeneFreitexte = freitextFelder
+      .map((f) => ({ ...f, text: get(data, f.pfad) }))
+      .filter((f): f is { titel: string; pfad: string[]; text: string } => Boolean(f.text));
+
+    kontextBox.hidden = false;
+    kontextBox.innerHTML = `
+      <h3>Kontext aus der PerSeh-Akte</h3>
+      ${eckdaten.length ? `<p>${eckdaten.join(' · ')}</p>` : ''}
+      ${gefundeneFreitexte
+        .map((f) => `<p><strong>${f.titel}:</strong> ${f.text}</p>`)
+        .join('')}
+      ${eckdaten.length === 0 && gefundeneFreitexte.length === 0 ? '<p>Keine passenden Angaben in der Datei gefunden.</p>' : ''}
+    `;
+
+    // Passenden Kontext direkt neben die betreffenden Fragen setzen, wo eine sinnvolle Zuordnung möglich ist.
+    setzeKontext('wohnsituation', get(data, ['personal_view', 'Wie und wo ich jetzt lebe']));
+    setzeKontext('alltag', get(data, ['tagesstruktur', 'unterstuetzungsbedarf']));
+    setzeKontext('kontakte', get(data, ['tagesstruktur', 'sozverhalten']));
+    setzeKontext(
+      'schwerbehindertenausweis',
+      behinderung && behinderung !== 'keine' ? `Behinderung laut Akte: ${behinderung}` : undefined
+    );
   });
 </script>

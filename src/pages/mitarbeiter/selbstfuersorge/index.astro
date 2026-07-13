@@ -1,36 +1,50 @@
 ---
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 const angebote = (await getCollection('selbstfuersorge', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order
 );
+const gerendert = await Promise.all(angebote.map((a) => render(a)));
 ---
 
 <BaseLayout title="Selbstfürsorge" noindex>
   <div class="container prose article">
     <h1>Selbstfürsorge</h1>
     <p class="lead muted">
-      Meditative Angebote für zwischendurch – für einen achtsamen Umgang mit dir selbst im Arbeitsalltag.
+      Meditative Angebote und Übungen für zwischendurch – für einen achtsamen Umgang mit dir selbst
+      im Arbeitsalltag.
     </p>
 
-    <ul class="card-grid">
+    <a href="/mitarbeiter/selbstfuersorge/tagebuch/" class="card card-featured">
+      <span class="badge">Neu</span>
+      <h2>Reflexions-Tagebuch</h2>
+      <p>Kurz innehalten und den Tag/Kontakt für dich reflektieren – nur in deinem Browser gespeichert.</p>
+      <span class="btn">Öffnen</span>
+    </a>
+
+    <h2>Übungen</h2>
+    <ul class="exercise-list">
       {
-        angebote.map((a) => (
-          <li class="card">
-            <h3>{a.data.title}</h3>
-            <p>{a.data.description}</p>
-            {a.data.audioUrl ? (
-              <audio controls src={a.data.audioUrl} style="width:100%">
-                Dein Browser unterstützt kein Audio-Element.
-              </audio>
-            ) : (
-              <span class="badge">Aufnahme folgt in Kürze</span>
-            )}
-          </li>
-        ))
+        angebote.map((a, i) => {
+          const { Content } = gerendert[i];
+          return (
+            <li class="card">
+              <h3>{a.data.title}</h3>
+              <p class="small muted">{a.data.description}</p>
+              {a.data.audioUrl && (
+                <audio controls src={a.data.audioUrl} style="width:100%; margin-bottom: 0.75rem;">
+                  Dein Browser unterstützt kein Audio-Element.
+                </audio>
+              )}
+              <div class="exercise-content">
+                <Content />
+              </div>
+            </li>
+          );
+        })
       }
     </ul>
 
@@ -41,5 +55,28 @@ const angebote = (await getCollection('selbstfuersorge', ({ data }) => !data.dra
 <style>
   .article {
     padding-block: 2.5rem 1rem;
+  }
+  .card-featured {
+    display: block;
+    margin: 1.5rem 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card-featured h2 {
+    margin-top: 0.75rem;
+  }
+  .card-featured .btn {
+    margin-top: 0.5rem;
+  }
+  .exercise-list {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .exercise-content {
+    margin-top: 0.75rem;
   }
 </style>
