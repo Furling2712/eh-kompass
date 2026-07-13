@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { produkte } from '../../../data/shop-produkte';
+
+export function getStaticPaths() {
+  return produkte.map((p) => ({ params: { id: p.id }, props: { produkt: p } }));
+}
+
+const { produkt } = Astro.props;
+---
+
+<BaseLayout title={produkt.name} description={produkt.beschreibung}>
+  <div class="container prose article">
+    <a href="/shop/" class="back-link">← Zurück zum Shop</a>
+
+    <div class="produkt-detail">
+      <img src={produkt.bild} alt={produkt.name} class="produkt-bild" />
+
+      <div>
+        <p class="small muted" style="margin:0">{produkt.kategorie}</p>
+        <h1 style="margin-top:0.25rem">{produkt.name}</h1>
+        <p>{produkt.beschreibung}</p>
+
+        <div class="tool-box">
+          <p class="small muted" style="margin-top:0">Im Lieferumfang enthalten:</p>
+          <ul style="margin-bottom:0">
+            {produkt.details.map((d) => <li>{d}</li>)}
+          </ul>
+        </div>
+
+        <p class="small muted">
+          Lieferzeit: <strong>{produkt.lieferzeit}</strong> · Von: {produkt.anbieter}
+        </p>
+        <p class="preis">{produkt.preis.toFixed(2)} €</p>
+
+        <div class="kauf-zeile">
+          <div class="menge-auswahl">
+            <button type="button" id="menge-minus" class="btn btn-secondary" aria-label="Menge verringern">
+              −
+            </button>
+            <span id="menge-wert">1</span>
+            <button type="button" id="menge-plus" class="btn btn-secondary" aria-label="Menge erhöhen">
+              +
+            </button>
+          </div>
+          <button type="button" id="in-warenkorb" class="btn" data-id={produkt.id}>
+            In den Warenkorb
+          </button>
+        </div>
+        <p id="hinzugefuegt-hinweis" class="small hinzugefuegt" hidden>Zum Warenkorb hinzugefügt ✓</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .produkt-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .produkt-detail {
+      grid-template-columns: 1fr;
+    }
+  }
+  .produkt-bild {
+    width: 100%;
+    border-radius: var(--radius);
+    background: var(--color-surface);
+  }
+  .preis {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0.5rem 0 1.25rem;
+  }
+  .kauf-zeile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .menge-auswahl {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .menge-auswahl button {
+    width: 2.5rem;
+    min-height: 2.5rem;
+  }
+  #menge-wert {
+    min-width: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+  }
+  .hinzugefuegt {
+    margin-top: 0.75rem;
+    color: var(--color-primary-dark);
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  import { addToCart } from '../../../lib/cart';
+
+  const mengeWert = document.getElementById('menge-wert') as HTMLSpanElement;
+  const mengeMinus = document.getElementById('menge-minus') as HTMLButtonElement;
+  const mengePlus = document.getElementById('menge-plus') as HTMLButtonElement;
+  const inWarenkorbBtn = document.getElementById('in-warenkorb') as HTMLButtonElement;
+  const hinweis = document.getElementById('hinzugefuegt-hinweis') as HTMLParagraphElement;
+
+  let menge = 1;
+
+  mengeMinus.addEventListener('click', () => {
+    menge = Math.max(1, menge - 1);
+    mengeWert.textContent = String(menge);
+  });
+  mengePlus.addEventListener('click', () => {
+    menge += 1;
+    mengeWert.textContent = String(menge);
+  });
+
+  inWarenkorbBtn.addEventListener('click', () => {
+    const id = inWarenkorbBtn.dataset.id;
+    if (!id) return;
+    addToCart(id, menge);
+    hinweis.hidden = false;
+    setTimeout(() => (hinweis.hidden = true), 2500);
+  });
+</script>

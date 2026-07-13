@@ -18,11 +18,11 @@ const leistungsfragen = fragen.filter((f) => f.kategorie === 'leistungen');
     </p>
 
     <div class="notice">
-      <strong>Platzhalter-Logik, keine Rechtsberatung</strong>
+      <strong>Keine Rechtsberatung!</strong>
       <p style="margin-bottom:0">
-        Die Fragen und die Zuordnung zu Leistungen in <code>src/data/bedarfs-check.ts</code> sind ein
-        Entwurf auf Basis von allgemeinem BEI_NRW-/EGH-Wissen und einer Internetrecherche (Stand 2026),
-        keine geprüfte Fachlogik und keine Rechtsberatung. Euro-Beträge und Prozentsätze ändern sich
+        Die Fragen und die Zuordnung zu Leistungen sind ein
+        Entwurf auf Basis von allgemeinem BEI_NRW-/EGH-Wissen,
+        keine Rechtsberatung. Euro-Beträge und Prozentsätze ändern sich
         regelmäßig – im Zweifel immer beim zuständigen Amt/Jobcenter nachfragen. Bitte durch echtes
         Fachwissen ersetzen/prüfen, bevor das im echten Betrieb genutzt wird.
       </p>
@@ -30,11 +30,11 @@ const leistungsfragen = fragen.filter((f) => f.kategorie === 'leistungen');
 
     <div class="tool-box">
       <p class="small muted" style="margin-top:0">
-        Optional: eine bei PerSeh exportierte JSON-Datei importieren, um die Klientendaten während der
+        Optional: eine im PerSeh-Formular erstellte JSON-Datei importieren, um die Klientendaten während der
         Bearbeitung als Kontext griffbereit zu haben.
       </p>
       <div class="field">
-        <label for="perseh-import">PerSeh-Export importieren (JSON)</label>
+        <label for="perseh-import">PerSeh-Formular importieren (JSON)</label>
         <input type="file" id="perseh-import" accept="application/json,.json" />
         <p class="small muted" style="margin:.4rem 0 0">
           Die Datei wird ausschließlich lokal in deinem Browser gelesen – nichts wird hochgeladen oder

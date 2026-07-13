@@ -24,6 +24,11 @@ const isActive = (href: string) =>
             <li>
               <a href={link.href} aria-current={isActive(link.href) ? 'page' : undefined}>
                 {link.label}
+                {link.href === '/shop/' && (
+                  <span id="warenkorb-badge" class="cart-badge" hidden>
+                    0
+                  </span>
+                )}
               </a>
             </li>
           ))
@@ -32,6 +37,17 @@ const isActive = (href: string) =>
     </nav>
   </div>
 </header>
+
+<script>
+  import { cartCount } from '../lib/cart';
+
+  const badge = document.getElementById('warenkorb-badge') as HTMLSpanElement | null;
+  const anzahl = cartCount();
+  if (badge && anzahl > 0) {
+    badge.textContent = String(anzahl);
+    badge.hidden = false;
+  }
+</script>
 
 <style>
   .site-header {
@@ -95,6 +111,19 @@ const isActive = (href: string) =>
   .nav-toggle,
   .nav-toggle-label {
     display: none;
+  }
+  .cart-badge {
+    display: inline-grid;
+    place-items: center;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 999px;
+    margin-left: 0.35rem;
+    padding: 0 0.3rem;
   }
 
   @media (max-width: 720px) {

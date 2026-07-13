@@ -5,43 +5,60 @@ import { produkte } from '../../data/shop-produkte';
 
 <BaseLayout
   title="Shop"
-  description="Systemtherapeutische Methoden und Materialien für die Eingliederungshilfe."
+  description="Handgefertigte systemtherapeutische Methoden und Materialien für die Eingliederungshilfe."
 >
   <div class="container prose article">
     <h1>Shop</h1>
     <p class="lead muted">
-      Systemtherapeutische Methoden und Materialien für die Eingliederungshilfe – von unserem
-      Systemiker.
+      Handgefertigte systemtherapeutische Materialien für die Eingliederungshilfe – von unserem
+      Systemiker, mit Sorgfalt in eigener Werkstatt hergestellt.
     </p>
-
-    <div class="notice">
-      <strong>Im Aufbau</strong>
-      <p style="margin-bottom:0">
-        Die Produkte hier sind Platzhalter. Echte Angebote, Preise und Checkout-Links kommen, sobald
-        das Material fertig ist.
-      </p>
-    </div>
 
     <ul class="card-grid">
       {
         produkte.map((p) => (
           <li class="card">
-            <h3>{p.titel}</h3>
+            <a href={`/shop/${p.id}/`} class="card-link">
+              <img src={p.bild} alt={p.name} class="produkt-bild" />
+              <h3>{p.name}</h3>
+            </a>
+            <p class="small muted" style="margin:-0.5rem 0 0">
+              {p.kategorie}
+            </p>
             <p>{p.beschreibung}</p>
-            <p class="small muted">Von: {p.anbieter}</p>
-            <p class="price" style="font-size:1.2rem">{p.preis}</p>
-            <a href={p.checkoutUrl} class="btn">
+            <p class="preis">{p.preis.toFixed(2)} €</p>
+            <a href={`/shop/${p.id}/`} class="btn">
               Ansehen
             </a>
           </li>
         ))
       }
     </ul>
+
+    <p><a href="/shop/warenkorb/" class="btn btn-secondary">Zum Warenkorb →</a></p>
   </div>
 </BaseLayout>
 
 <style>
   .article {
     padding-block: 2.5rem 1rem;
+  }
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .produkt-bild {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    background: var(--color-surface);
+  }
+  .preis {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0.25rem 0 1rem;
   }
 </style>

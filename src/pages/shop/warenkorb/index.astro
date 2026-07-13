@@ -1,0 +1,255 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Warenkorb" description="Dein Warenkorb im EH-Kompass-Shop." noindex>
+  <div class="container prose article">
+    <h1>Dein Warenkorb</h1>
+
+    <div class="notice">
+      <strong>So funktioniert die Bestellung</strong>
+      <p style="margin-bottom:0">
+        Es gibt noch keine eigene Zahlungsabwicklung. Beim Absenden öffnet sich eine vorausgefüllte
+        E-Mail an uns mit deiner Bestellung – bitte einfach prüfen und abschicken. Es wird nichts auf
+        einem Server gespeichert; der Warenkorb liegt nur in deinem Browser.
+      </p>
+    </div>
+
+    <div id="warenkorb-leer" class="tool-box" hidden>
+      <p style="margin:0">Dein Warenkorb ist noch leer.</p>
+      <p style="margin:1rem 0 0"><a href="/shop/" class="btn">Weiter einkaufen</a></p>
+    </div>
+
+    <div id="warenkorb-inhalt" hidden>
+      <ul id="warenkorb-liste" class="warenkorb-liste"></ul>
+      <p class="gesamt">Gesamt: <span id="warenkorb-gesamt">0,00 €</span></p>
+
+      <div class="tool-box">
+        <h2 style="margin-top:0">Deine Daten</h2>
+        <form id="bestell-form">
+          <div class="field">
+            <label for="name">Vollständiger Name</label>
+            <input type="text" id="name" name="name" required />
+          </div>
+          <div class="field">
+            <label for="email">E-Mail-Adresse</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="field">
+            <label for="adresse">Straße und Hausnummer</label>
+            <input type="text" id="adresse" name="adresse" required />
+          </div>
+          <div class="field plz-ort">
+            <div>
+              <label for="plz">PLZ</label>
+              <input type="text" id="plz" name="plz" required />
+            </div>
+            <div>
+              <label for="ort">Ort</label>
+              <input type="text" id="ort" name="ort" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="nachricht">Anmerkungen (optional)</label>
+            <textarea id="nachricht" name="nachricht" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn">Bestellung per E-Mail senden</button>
+        </form>
+      </div>
+    </div>
+
+    <p><a href="/shop/" class="btn btn-secondary">← Zurück zum Shop</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .warenkorb-liste {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .warenkorb-item {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .warenkorb-item img {
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+  .warenkorb-item-info {
+    flex: 1;
+    min-width: 10rem;
+  }
+  .warenkorb-item-info p {
+    margin: 0;
+  }
+  .warenkorb-item-menge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .warenkorb-item-menge button {
+    width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0;
+  }
+  .warenkorb-item-preis {
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    min-width: 5.5rem;
+    text-align: right;
+  }
+  .warenkorb-item-entfernen {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    min-height: auto;
+    width: auto;
+    padding: 0.25rem 0.5rem;
+  }
+  .gesamt {
+    text-align: right;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+  }
+  .plz-ort {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 0.75rem;
+  }
+</style>
+
+<script>
+  import { produkte, BESTELL_EMAIL } from '../../../data/shop-produkte';
+  import { getCart, setQuantity, removeFromCart, clearCart } from '../../../lib/cart';
+
+  const leerBox = document.getElementById('warenkorb-leer') as HTMLDivElement;
+  const inhaltBox = document.getElementById('warenkorb-inhalt') as HTMLDivElement;
+  const liste = document.getElementById('warenkorb-liste') as HTMLUListElement;
+  const gesamtEl = document.getElementById('warenkorb-gesamt') as HTMLSpanElement;
+  const form = document.getElementById('bestell-form') as HTMLFormElement;
+
+  function aktuellePositionen() {
+    return getCart()
+      .map((item) => ({ item, produkt: produkte.find((p) => p.id === item.id) }))
+      .filter((p): p is { item: { id: string; menge: number }; produkt: (typeof produkte)[number] } =>
+        Boolean(p.produkt)
+      );
+  }
+
+  function rendereWarenkorb() {
+    const positionen = aktuellePositionen();
+
+    if (positionen.length === 0) {
+      leerBox.hidden = false;
+      inhaltBox.hidden = true;
+      return;
+    }
+
+    leerBox.hidden = true;
+    inhaltBox.hidden = false;
+
+    let gesamt = 0;
+    liste.innerHTML = positionen
+      .map(({ item, produkt }) => {
+        const zeilenpreis = produkt.preis * item.menge;
+        gesamt += zeilenpreis;
+        return `
+          <li class="warenkorb-item" data-id="${produkt.id}">
+            <img src="${produkt.bild}" alt="${produkt.name}" />
+            <div class="warenkorb-item-info">
+              <p><strong>${produkt.name}</strong></p>
+              <p class="small muted">${produkt.preis.toFixed(2)} € / Stück</p>
+            </div>
+            <div class="warenkorb-item-menge">
+              <button type="button" class="btn btn-secondary menge-minus" aria-label="Menge verringern">−</button>
+              <span>${item.menge}</span>
+              <button type="button" class="btn btn-secondary menge-plus" aria-label="Menge erhöhen">+</button>
+            </div>
+            <span class="warenkorb-item-preis">${zeilenpreis.toFixed(2)} €</span>
+            <button type="button" class="warenkorb-item-entfernen" aria-label="Entfernen">✕</button>
+          </li>
+        `;
+      })
+      .join('');
+    gesamtEl.textContent = `${gesamt.toFixed(2)} €`;
+
+    liste.querySelectorAll<HTMLLIElement>('.warenkorb-item').forEach((li) => {
+      const id = li.dataset.id!;
+      const aktuelleMenge = positionen.find((p) => p.produkt.id === id)!.item.menge;
+
+      li.querySelector('.menge-minus')?.addEventListener('click', () => {
+        setQuantity(id, aktuelleMenge - 1);
+        rendereWarenkorb();
+      });
+      li.querySelector('.menge-plus')?.addEventListener('click', () => {
+        setQuantity(id, aktuelleMenge + 1);
+        rendereWarenkorb();
+      });
+      li.querySelector('.warenkorb-item-entfernen')?.addEventListener('click', () => {
+        removeFromCart(id);
+        rendereWarenkorb();
+      });
+    });
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const positionen = aktuellePositionen();
+    if (positionen.length === 0) return;
+
+    const daten = new FormData(form);
+    const name = String(daten.get('name') ?? '');
+    const email = String(daten.get('email') ?? '');
+    const adresse = String(daten.get('adresse') ?? '');
+    const plz = String(daten.get('plz') ?? '');
+    const ort = String(daten.get('ort') ?? '');
+    const nachricht = String(daten.get('nachricht') ?? '');
+
+    const gesamt = positionen.reduce((summe, { item, produkt }) => summe + produkt.preis * item.menge, 0);
+
+    const zeilen = positionen.map(
+      ({ item, produkt }) => `- ${produkt.name} x${item.menge} = ${(produkt.preis * item.menge).toFixed(2)} €`
+    );
+
+    const body = [
+      `Name: ${name}`,
+      `E-Mail: ${email}`,
+      `Adresse: ${adresse}, ${plz} ${ort}`,
+      '',
+      'Bestellte Produkte:',
+      ...zeilen,
+      '',
+      `Gesamt: ${gesamt.toFixed(2)} €`,
+      nachricht ? `\nAnmerkungen: ${nachricht}` : '',
+    ].join('\n');
+
+    const mailtoLink = `mailto:${BESTELL_EMAIL}?subject=${encodeURIComponent(
+      `Neue Bestellung – ${name}`
+    )}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoLink;
+    clearCart();
+    rendereWarenkorb();
+    form.reset();
+  });
+
+  rendereWarenkorb();
+</script>
