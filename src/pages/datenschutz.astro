@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Datenschutzerklärung"
+  description="Informationen zur Verarbeitung personenbezogener Daten auf EH-Kompass."
+>
+  <div class="container prose article">
+    <h1>Datenschutzerklärung</h1>
+
+    <div class="notice">
+      <strong>⚠️ Vor dem Launch prüfen &amp; ergänzen</strong>
+      <p style="margin-bottom:0">
+        Diese Erklärung ist eine anpassbare Vorlage. Ergänze/streiche die Abschnitte je nachdem,
+        welche Dienste du tatsächlich einsetzt (Hosting, Analytics, AdSense, Newsletter,
+        Digitalprodukt-Anbieter). Im Zweifel einen DSGVO-Generator oder Fachanwalt nutzen.
+      </p>
+    </div>
+
+    <h2>1. Verantwortlicher</h2>
+    <p>
+      Verantwortlich für die Datenverarbeitung auf dieser Website ist der im
+      <a href="/impressum">Impressum</a> genannte Betreiber.
+    </p>
+
+    <h2>2. Grundsatz: datensparsame Tools</h2>
+    <p>
+      Die interaktiven Tools dieser Seite (Fristenrechner, Orientierungsrechner,
+      Widerspruch-Generator) laufen vollständig <strong>in deinem Browser</strong>. Deine Eingaben
+      werden nicht an einen Server übertragen, nicht gespeichert und nicht ausgewertet. Sobald du
+      die Seite schließt, sind die Eingaben weg.
+    </p>
+
+    <h2>3. Hosting &amp; Server-Logfiles</h2>
+    <p>
+      Diese Website wird bei einem Hosting-Dienstleister betrieben [z. B. Vercel/Netlify]. Beim
+      Aufruf erhebt der Anbieter automatisch Zugriffsdaten (Server-Logfiles) wie IP-Adresse,
+      Datum/Uhrzeit, aufgerufene Seite, Browsertyp. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+      (berechtigtes Interesse an einem sicheren, störungsfreien Betrieb).
+    </p>
+
+    <h2>4. Reichweitenmessung (Analytics)</h2>
+    <p>
+      [Sofern eingesetzt:] Zur statistischen Auswertung nutze ich [Plausible/Simple Analytics], ein
+      cookiefreies, datenschutzfreundliches Analyse-Tool. Es werden keine Cookies gesetzt und keine
+      personenbezogenen Profile gebildet; IP-Adressen werden nicht dauerhaft gespeichert.
+      Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
+    </p>
+
+    <h2>5. Werbung</h2>
+    <p>
+      [Sofern eingesetzt:] Diese Seite finanziert sich u. a. über Werbung [z. B. Google AdSense].
+      Der Werbeanbieter kann Cookies bzw. vergleichbare Technologien einsetzen. Diese werden erst
+      nach deiner Einwilligung über den Cookie-Banner aktiviert (Art. 6 Abs. 1 lit. a DSGVO, § 25
+      Abs. 1 TDDDG). Du kannst deine Einwilligung jederzeit widerrufen.
+    </p>
+
+    <h2>6. Kontaktaufnahme</h2>
+    <p>
+      Wenn du mir per E-Mail schreibst, verarbeite ich deine Angaben zur Bearbeitung der Anfrage
+      (Art. 6 Abs. 1 lit. b bzw. f DSGVO). Die Daten werden gelöscht, sobald sie nicht mehr benötigt
+      werden.
+    </p>
+
+    <h2>7. Deine Rechte</h2>
+    <p>
+      Du hast das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17),
+      Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch
+      (Art. 21 DSGVO). Zudem steht dir ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde
+      zu.
+    </p>
+
+    <h2>8. Stand</h2>
+    <p class="muted">Diese Datenschutzerklärung wird bei Bedarf aktualisiert.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

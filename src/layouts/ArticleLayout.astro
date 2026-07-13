@@ -1,0 +1,66 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  stand?: string;
+  quelle?: string;
+  quelleLabel?: string;
+  legal?: boolean;
+}
+
+const { title, description, pubDate, updatedDate, stand, quelle, quelleLabel, legal = true } =
+  Astro.props;
+
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }).format(d);
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="container prose article">
+    <header class="article-head">
+      <a href="/ratgeber/" class="small back-link">← Alle Ratgeber-Artikel</a>
+      <h1>{title}</h1>
+      <p class="lead muted">{description}</p>
+      <p class="small muted meta">
+        Veröffentlicht am {fmt(pubDate)}
+        {updatedDate && <> · Aktualisiert am {fmt(updatedDate)}</>}
+      </p>
+    </header>
+
+    <div class="article-body">
+      <slot />
+    </div>
+
+    {legal && <Disclaimer stand={stand} quelle={quelle} quelleLabel={quelleLabel} />}
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .article-head {
+    margin-bottom: 2rem;
+  }
+  .back-link {
+    text-decoration: none;
+    color: var(--color-muted);
+  }
+  .article-head h1 {
+    margin-top: 0.75rem;
+  }
+  .lead {
+    font-size: 1.15rem;
+  }
+  .meta {
+    margin-top: 0.5rem;
+  }
+  .article-body :global(h2) {
+    scroll-margin-top: 5rem;
+  }
+</style>

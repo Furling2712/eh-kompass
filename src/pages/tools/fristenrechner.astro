@@ -1,0 +1,312 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+---
+
+<BaseLayout
+  title="Fristenrechner Widerspruch"
+  description="Berechne die Widerspruchsfrist deines Eingliederungshilfe-Bescheids: ab Zustelldatum oder Bescheiddatum, inklusive Wochenend- und Feiertagsregel."
+>
+  <div class="container prose article">
+    <span class="badge">Tool · Frist</span>
+    <h1>Fristenrechner: Widerspruch</h1>
+    <p class="lead muted">
+      Gegen einen Bescheid der Eingliederungshilfe kannst du in der Regel innerhalb <strong>eines
+      Monats</strong> Widerspruch einlegen (§ 84 SGG). Dieser Rechner ermittelt den letzten Tag der
+      Frist.
+    </p>
+
+    <div class="tool-box">
+      <form id="frist-form" novalidate>
+        <div class="field">
+          <label for="modus">Was weißt du?</label>
+          <select id="modus" name="modus">
+            <option value="zustell">Ich kenne das Zustelldatum (Tag, an dem der Brief ankam)</option>
+            <option value="bescheid">Ich kenne nur das Datum auf dem Bescheid</option>
+          </select>
+          <p class="small muted" id="modus-hint" style="margin:.4rem 0 0"></p>
+        </div>
+
+        <div class="field">
+          <label for="datum" id="datum-label">Zustelldatum</label>
+          <input type="date" id="datum" name="datum" required />
+        </div>
+
+        <div class="field">
+          <label for="bundesland">Bundesland (für Feiertage)</label>
+          <select id="bundesland" name="bundesland">
+            <option value="BW">Baden-Württemberg</option>
+            <option value="BY">Bayern</option>
+            <option value="BE">Berlin</option>
+            <option value="BB">Brandenburg</option>
+            <option value="HB">Bremen</option>
+            <option value="HH">Hamburg</option>
+            <option value="HE">Hessen</option>
+            <option value="MV">Mecklenburg-Vorpommern</option>
+            <option value="NI">Niedersachsen</option>
+            <option value="NW" selected>Nordrhein-Westfalen</option>
+            <option value="RP">Rheinland-Pfalz</option>
+            <option value="SL">Saarland</option>
+            <option value="SN">Sachsen</option>
+            <option value="ST">Sachsen-Anhalt</option>
+            <option value="SH">Schleswig-Holstein</option>
+            <option value="TH">Thüringen</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="frist-dauer">Frist laut Rechtsbehelfsbelehrung</label>
+          <select id="frist-dauer" name="frist-dauer">
+            <option value="1">1 Monat (Standardfall)</option>
+            <option value="3">3 Monate (fehlende/fehlerhafte Rechtsbehelfsbelehrung)</option>
+          </select>
+          <p class="small muted" style="margin:.4rem 0 0">
+            Fehlt im Bescheid eine korrekte Rechtsbehelfsbelehrung, verlängert sich die Frist meist
+            auf ein Jahr (§ 66 SGG). Wähle im Zweifel „1 Monat“ und prüfe die Belehrung.
+          </p>
+        </div>
+
+        <button type="submit" class="btn">Frist berechnen</button>
+      </form>
+
+      <div id="ergebnis" class="result" hidden aria-live="polite"></div>
+    </div>
+
+    <h2>Wie rechnet dieses Tool?</h2>
+    <ul>
+      <li>
+        <strong>Zustelldatum bekannt:</strong> Die Frist beginnt am Tag nach der Bekanntgabe
+        (§ 64 Abs. 1 SGG). Ein Monat später endet sie an dem Tag mit der gleichen Zahl.
+      </li>
+      <li>
+        <strong>Nur Bescheiddatum bekannt:</strong> Bei einem per Post übermittelten Bescheid gilt
+        die Bekanntgabe am dritten Tag nach Aufgabe zur Post (Drei-Tages-Fiktion, § 37 Abs. 2
+        SGB X). Von dort an wird gerechnet.
+      </li>
+      <li>
+        <strong>Wochenende/Feiertag:</strong> Fällt das Fristende auf einen Samstag, Sonntag oder
+        gesetzlichen Feiertag, endet die Frist erst am nächsten Werktag (§ 64 Abs. 3 SGG).
+      </li>
+    </ul>
+
+    <div class="notice">
+      <strong>Wichtig</strong>
+      <p style="margin-bottom:0">
+        Der Rechner ist eine Orientierungshilfe. Die genaue Frist hängt vom Einzelfall ab (z. B.
+        tatsächlicher Zugang, Zustellungsart, individuelle Feiertage). Reiche im Zweifel lieber
+        früher ein und verlasse dich nicht allein auf dieses Tool. Bei knappen Fristen: sofort
+        handeln.
+      </p>
+    </div>
+
+    <p><a href="/tools/widerspruch-generator" class="btn btn-secondary">Weiter zum Widerspruch-Generator →</a></p>
+
+    <Disclaimer
+      stand="Juli 2026"
+      quelle="https://www.gesetze-im-internet.de/sgg/__84.html"
+      quelleLabel="§ 84 SGG (Widerspruchsfrist)"
+    />
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>
+
+<script>
+  type Bundesland =
+    | 'BW' | 'BY' | 'BE' | 'BB' | 'HB' | 'HH' | 'HE' | 'MV'
+    | 'NI' | 'NW' | 'RP' | 'SL' | 'SN' | 'ST' | 'SH' | 'TH';
+
+  // Ostersonntag nach der Gaußschen Osterformel (funktioniert für 1900–2099).
+  function easterSunday(year: number): Date {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31); // 3 = März, 4 = April
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day);
+  }
+
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  function addDays(d: Date, n: number): Date {
+    const r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
+  }
+
+  // Liefert die Menge gesetzlicher Feiertage (als ISO-Strings) für Jahr + Bundesland.
+  function holidays(year: number, bl: Bundesland): Set<string> {
+    const set = new Set<string>();
+    const add = (m: number, day: number) => set.add(iso(new Date(year, m - 1, day)));
+
+    // Bundesweite Feiertage
+    add(1, 1); // Neujahr
+    add(5, 1); // Tag der Arbeit
+    add(10, 3); // Tag der Deutschen Einheit
+    add(12, 25); // 1. Weihnachtstag
+    add(12, 26); // 2. Weihnachtstag
+
+    // Bewegliche Feiertage (relativ zu Ostersonntag)
+    const easter = easterSunday(year);
+    set.add(iso(addDays(easter, -2))); // Karfreitag
+    set.add(iso(addDays(easter, 1))); // Ostermontag
+    set.add(iso(addDays(easter, 39))); // Christi Himmelfahrt
+    set.add(iso(addDays(easter, 50))); // Pfingstmontag
+
+    // Heilige Drei Könige (6.1)
+    if (['BW', 'BY', 'ST'].includes(bl)) add(1, 6);
+    // Internationaler Frauentag (8.3)
+    if (['BE', 'MV'].includes(bl)) add(3, 8);
+    // Fronleichnam (Ostern + 60)
+    if (['BW', 'BY', 'HE', 'NW', 'RP', 'SL'].includes(bl))
+      set.add(iso(addDays(easter, 60)));
+    // Mariä Himmelfahrt (15.8) – SL immer, BY teilweise (hier für SL angesetzt)
+    if (['SL'].includes(bl)) add(8, 15);
+    // Weltkindertag (20.9)
+    if (['TH'].includes(bl)) add(9, 20);
+    // Reformationstag (31.10)
+    if (['BB', 'HB', 'HH', 'MV', 'NI', 'SN', 'ST', 'SH', 'TH'].includes(bl)) add(10, 31);
+    // Allerheiligen (1.11)
+    if (['BW', 'BY', 'NW', 'RP', 'SL'].includes(bl)) add(11, 1);
+    // Buß- und Bettag (Mittwoch vor dem 23.11) – nur Sachsen
+    if (bl === 'SN') {
+      const nov23 = new Date(year, 10, 23);
+      // zurück bis zum vorherigen Mittwoch (getDay() === 3)
+      let bbt = nov23;
+      do {
+        bbt = addDays(bbt, -1);
+      } while (bbt.getDay() !== 3);
+      set.add(iso(bbt));
+    }
+    return set;
+  }
+
+  function isWorkday(d: Date, bl: Bundesland): boolean {
+    const day = d.getDay();
+    if (day === 0 || day === 6) return false; // So/Sa
+    return !holidays(d.getFullYear(), bl).has(iso(d));
+  }
+
+  // Verschiebt d auf den nächsten Werktag (inkl. d selbst).
+  function nextWorkday(d: Date, bl: Bundesland): Date {
+    let r = new Date(d);
+    while (!isWorkday(r, bl)) r = addDays(r, 1);
+    return r;
+  }
+
+  const fmtLong = (d: Date) =>
+    new Intl.DateTimeFormat('de-DE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }).format(d);
+
+  const form = document.getElementById('frist-form') as HTMLFormElement;
+  const out = document.getElementById('ergebnis') as HTMLDivElement;
+  const modus = document.getElementById('modus') as HTMLSelectElement;
+  const datumLabel = document.getElementById('datum-label') as HTMLLabelElement;
+  const modusHint = document.getElementById('modus-hint') as HTMLParagraphElement;
+
+  function syncModus() {
+    if (modus.value === 'bescheid') {
+      datumLabel.textContent = 'Datum auf dem Bescheid';
+      modusHint.textContent =
+        'Es wird die gesetzliche Drei-Tages-Fiktion angewendet (Bekanntgabe = 3. Tag nach diesem Datum).';
+    } else {
+      datumLabel.textContent = 'Zustelldatum';
+      modusHint.textContent = 'Der Tag, an dem der Brief tatsächlich bei dir angekommen ist.';
+    }
+  }
+  modus.addEventListener('change', syncModus);
+  syncModus();
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const datumStr = (document.getElementById('datum') as HTMLInputElement).value;
+    const bl = (document.getElementById('bundesland') as HTMLSelectElement).value as Bundesland;
+    const monate = parseInt((document.getElementById('frist-dauer') as HTMLSelectElement).value, 10);
+
+    if (!datumStr) {
+      out.hidden = false;
+      out.innerHTML = '<strong>Bitte gib ein Datum ein.</strong>';
+      return;
+    }
+
+    // Datum lokal (ohne Zeitzonen-Verschiebung) parsen
+    const [y, m, dd] = datumStr.split('-').map(Number);
+    const eingabe = new Date(y, m - 1, dd);
+
+    // Bekanntgabe bestimmen
+    let bekanntgabe: Date;
+    let fiktionHinweis = '';
+    if (modus.value === 'bescheid') {
+      bekanntgabe = addDays(eingabe, 3);
+      // Fällt der 3. Tag auf Sa/So/Feiertag, verschiebt sich die Bekanntgabe auf den nächsten Werktag.
+      const verschoben = nextWorkday(bekanntgabe, bl);
+      if (verschoben.getTime() !== bekanntgabe.getTime()) {
+        bekanntgabe = verschoben;
+        fiktionHinweis =
+          ' Da der dritte Tag auf ein Wochenende/einen Feiertag fiel, verschiebt sich die Bekanntgabe auf den nächsten Werktag.';
+      }
+    } else {
+      bekanntgabe = eingabe;
+    }
+
+    // Fristbeginn: Tag nach Bekanntgabe (§ 64 Abs. 1 SGG). Fristende: gleiche Tageszahl
+    // n Monate später (§ 64 Abs. 2 SGG i. V. m. § 26 SGB X / § 188 BGB).
+    let ende = new Date(bekanntgabe);
+    ende.setMonth(ende.getMonth() + monate);
+    // Monatsende-Korrektur: z. B. 31.01 + 1 Monat -> 28./29.02 (Datum "rutscht" sonst in den März).
+    if (ende.getDate() !== bekanntgabe.getDate()) {
+      ende.setDate(0); // letzter Tag des Vormonats
+    }
+
+    const endeVorVerschiebung = new Date(ende);
+    const endeWerktag = nextWorkday(ende, bl);
+    const verschoben = endeWerktag.getTime() !== endeVorVerschiebung.getTime();
+
+    // Resttage relativ zu heute
+    const heute = new Date();
+    heute.setHours(0, 0, 0, 0);
+    const tageRest = Math.round((endeWerktag.getTime() - heute.getTime()) / 86_400_000);
+
+    let statusHtml = '';
+    if (tageRest < 0) {
+      statusHtml =
+        '<p style="margin:.75rem 0 0"><strong style="color:#a12a2a">Die Frist ist nach dieser Rechnung bereits abgelaufen.</strong> Es kann Ausnahmen geben (z. B. Wiedereinsetzung in den vorigen Stand). Lass dich zeitnah beraten.</p>';
+    } else if (tageRest === 0) {
+      statusHtml =
+        '<p style="margin:.75rem 0 0"><strong style="color:#a12a2a">Die Frist endet heute.</strong> Reiche deinen Widerspruch noch heute ein.</p>';
+    } else {
+      statusHtml = `<p style="margin:.75rem 0 0">Nach dieser Rechnung hast du noch <strong>${tageRest} Tag${tageRest === 1 ? '' : 'e'}</strong> Zeit.</p>`;
+    }
+
+    out.hidden = false;
+    out.innerHTML = `
+      <p style="margin:0 0 .5rem">Letzter Tag für den Widerspruch:</p>
+      <p style="font-size:1.35rem;margin:0"><strong>${fmtLong(endeWerktag)}</strong></p>
+      <hr style="margin:1rem 0">
+      <p class="small muted" style="margin:0">
+        Bekanntgabe angesetzt am ${fmtLong(bekanntgabe)}.${fiktionHinweis}
+        ${verschoben ? ` Das rechnerische Fristende (${fmtLong(endeVorVerschiebung)}) fiel auf ein Wochenende/einen Feiertag und wurde auf den nächsten Werktag verschoben.` : ''}
+      </p>
+      ${statusHtml}
+    `;
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+</script>

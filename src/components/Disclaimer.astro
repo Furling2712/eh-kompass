@@ -1,0 +1,30 @@
+---
+// Wiederverwendbarer Rechtshinweis (Pflicht laut SPEC Abschnitt 4).
+// `stand` = Stand-Datum des Inhalts, `quelle` = optionaler Link zum Gesetzestext.
+interface Props {
+  stand?: string;
+  quelle?: string;
+  quelleLabel?: string;
+}
+const { stand, quelle, quelleLabel } = Astro.props;
+---
+
+<aside class="notice" role="note">
+  <strong>⚖️ Rechtlicher Hinweis</strong>
+  <p style="margin-bottom:0">
+    Diese Inhalte dienen der allgemeinen Information und ersetzen keine individuelle
+    Rechts- oder Sozialberatung. Alle Angaben ohne Gewähr. Maßgeblich ist stets der
+    jeweils gültige Gesetzestext und dein individueller Bescheid.
+    {stand && <><br /><span class="small muted">Stand: {stand}.</span></>}
+    {
+      quelle && (
+        <>
+          {' '}
+          <a href={quelle} rel="nofollow noopener" target="_blank" class="small">
+            {quelleLabel ?? 'Zum Gesetzestext'}
+          </a>
+        </>
+      )
+    }
+  </p>
+</aside>

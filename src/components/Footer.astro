@@ -1,0 +1,79 @@
+---
+import { SITE_TITLE, NAV_LINKS, LEGAL_LINKS } from '../consts';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-col">
+      <strong>{SITE_TITLE}</strong>
+      <p class="small muted">
+        Unabhängige Informationen und Tools zur Eingliederungshilfe nach § 113 SGB IX.
+        Keine Rechtsberatung.
+      </p>
+    </div>
+
+    <nav class="footer-col" aria-label="Seiten">
+      <strong>Seiten</strong>
+      <ul>
+        {NAV_LINKS.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <nav class="footer-col" aria-label="Rechtliches">
+      <strong>Rechtliches</strong>
+      <ul>
+        {LEGAL_LINKS.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="container footer-bottom">
+    <p class="small muted">© {year} {SITE_TITLE}. Alle Angaben ohne Gewähr.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+  }
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 2rem;
+  }
+  .footer-col strong {
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+  .footer-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .footer-col li {
+    margin-bottom: 0.35rem;
+  }
+  .footer-col a {
+    text-decoration: none;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+  }
+  .footer-col a:hover {
+    color: var(--color-primary);
+  }
+  .footer-bottom {
+    border-top: 1px solid var(--color-border);
+    margin-top: 2rem;
+    padding-block: 1rem;
+  }
+  @media (max-width: 640px) {
+    .footer-inner {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>

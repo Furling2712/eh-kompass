@@ -1,0 +1,46 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+
+export async function getStaticPaths() {
+  const terms = await getCollection('glossar', ({ data }) => !data.draft);
+  return terms.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const fmt = (date: Date) =>
+  new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+---
+
+<BaseLayout title={`${d.term} — Glossar`} description={d.description}>
+  <article class="container prose article">
+    <a href="/glossar/" class="small back-link">← Zurück zum Glossar</a>
+    <h1>{d.title}</h1>
+    <p class="lead muted">{d.description}</p>
+    <div class="article-body">
+      <Content />
+    </div>
+    <p class="small muted">Stand: {fmt(d.updatedDate ?? d.pubDate)}</p>
+    <Disclaimer />
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .back-link {
+    text-decoration: none;
+    color: var(--color-muted);
+  }
+  .article h1 {
+    margin-top: 0.75rem;
+  }
+</style>

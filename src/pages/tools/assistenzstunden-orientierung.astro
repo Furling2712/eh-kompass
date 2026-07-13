@@ -1,0 +1,159 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+
+// Lebensbereiche in Anlehnung an ICF-Domänen. Reine Orientierung, keine Bemessung.
+const bereiche = [
+  {
+    id: 'selbstversorgung',
+    label: 'Selbstversorgung',
+    hint: 'Körperpflege, Ernährung, Gesundheit im Alltag – wie viel Unterstützung brauchst du hier?',
+  },
+  {
+    id: 'haushalt',
+    label: 'Haushalt & Wohnen',
+    hint: 'Einkaufen, Kochen, Wäsche, Ordnung, Post/Behördenkram, Umgang mit der Wohnung.',
+  },
+  {
+    id: 'tagesstruktur',
+    label: 'Tagesstruktur & Beschäftigung',
+    hint: 'Tagesablauf, Aufstehen, Termine, Arbeit/Beschäftigung, sinnvolle Aktivitäten.',
+  },
+  {
+    id: 'soziales',
+    label: 'Soziale Kontakte & Teilhabe',
+    hint: 'Kontakte pflegen, Freizeit, am gesellschaftlichen Leben teilnehmen, Einsamkeit.',
+  },
+  {
+    id: 'gesundheit',
+    label: 'Psychische Stabilität & Krisen',
+    hint: 'Umgang mit der Erkrankung, Krisenanfälligkeit, Medikamente, therapeutische Termine.',
+  },
+];
+
+const stufen = [
+  { value: 0, label: 'Keine – schaffe ich selbst' },
+  { value: 1, label: 'Wenig – ab und zu ein Anstoß' },
+  { value: 2, label: 'Mittel – regelmäßige Begleitung' },
+  { value: 3, label: 'Viel – häufige, verlässliche Unterstützung' },
+];
+---
+
+<BaseLayout
+  title="Assistenzstunden-Orientierung"
+  description="Grobe Orientierung, welcher Umfang an Unterstützung in der Eingliederungshilfe zu deiner Lebenssituation passen könnte. Keine verbindliche Bedarfsfeststellung."
+>
+  <div class="container prose article">
+    <span class="badge">Tool · Orientierung</span>
+    <h1>Assistenzstunden-Orientierung</h1>
+    <p class="lead muted">
+      Dieses Tool gibt dir ein grobes Gefühl dafür, in welcher Größenordnung sich Unterstützung
+      bewegen könnte. Es ersetzt <strong>keine</strong> Bedarfsermittlung durch den Kostenträger.
+    </p>
+
+    <div class="notice">
+      <strong>Bitte zuerst lesen</strong>
+      <p style="margin-bottom:0">
+        Der tatsächliche Umfang der Eingliederungshilfe wird immer individuell in einem
+        Bedarfsermittlungsverfahren (z. B. BEI_NRW, PerSEH, B.E.Ni …) festgestellt – nicht durch
+        eine Formel. Dieses Tool bildet nur eine sehr vereinfachte Ersteinschätzung ab, damit du
+        besser einordnen kannst, worüber im Gespräch gesprochen wird.
+      </p>
+    </div>
+
+    <div class="tool-box">
+      <form id="ass-form">
+        {
+          bereiche.map((b) => (
+            <div class="field">
+              <label for={b.id}>{b.label}</label>
+              <p class="small muted" style="margin:.2rem 0 .5rem">{b.hint}</p>
+              <select id={b.id} name={b.id} data-bereich>
+                {stufen.map((s) => (
+                  <option value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          ))
+        }
+        <button type="submit" class="btn">Orientierung berechnen</button>
+      </form>
+
+      <div id="ass-ergebnis" class="result" hidden aria-live="polite"></div>
+    </div>
+
+    <h2>Wie ist die Einschätzung zu verstehen?</h2>
+    <p>
+      Für jeden Lebensbereich schätzt du deinen Unterstützungsbedarf grob ein. Das Tool rechnet
+      daraus einen ungefähren wöchentlichen Stundenrahmen. Dieser Rahmen ist bewusst breit – dein
+      realer Bedarf kann deutlich darunter oder darüber liegen. Entscheidend ist immer das
+      persönliche Gespräch mit dem Kostenträger und deinem Leistungserbringer.
+    </p>
+
+    <h2>Wie geht es weiter?</h2>
+    <ul>
+      <li>Notiere dir konkrete Beispiele aus deinem Alltag für jeden Bereich.</li>
+      <li>Bereite dich mit unserem <a href="/ratgeber/">Ratgeber</a> auf die Bedarfsermittlung vor.</li>
+      <li>Ziehe eine unabhängige Teilhabeberatung (EUTB) hinzu – sie ist kostenlos.</li>
+    </ul>
+
+    <Disclaimer stand="Juli 2026" />
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>
+
+<script>
+  const form = document.getElementById('ass-form') as HTMLFormElement;
+  const out = document.getElementById('ass-ergebnis') as HTMLDivElement;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const selects = Array.from(
+      form.querySelectorAll<HTMLSelectElement>('select[data-bereich]')
+    );
+    const werte = selects.map((s) => parseInt(s.value, 10));
+    const summe = werte.reduce((a, b) => a + b, 0);
+    const max = selects.length * 3; // theoretisches Maximum
+
+    // Grobe Übersetzung Punkte -> Wochenstunden-Rahmen. Bewusst weite Spannen.
+    // Kalibrierung: ~1,3–2,0 Std. je Punkt, gerundet auf halbe/ganze Stunden.
+    const untenRaw = summe * 1.3;
+    const obenRaw = summe * 2.0;
+    const unten = Math.max(summe > 0 ? 1 : 0, Math.floor(untenRaw));
+    const oben = Math.ceil(obenRaw);
+
+    let einordnung: string;
+    const anteil = summe / max;
+    if (summe === 0) {
+      einordnung =
+        'Du hast überall „keine Unterstützung“ angegeben. Möglicherweise besteht aktuell kein Bedarf an Eingliederungshilfe – oder du hast einzelne Punkte noch nicht bedacht.';
+    } else if (anteil < 0.3) {
+      einordnung =
+        'Dein Bedarf wirkt eher punktuell. Häufig geht es dann um niedrigschwellige Begleitung in einzelnen Bereichen.';
+    } else if (anteil < 0.6) {
+      einordnung =
+        'Dein Bedarf verteilt sich auf mehrere Lebensbereiche. Eine regelmäßige, planbare Begleitung ist in solchen Situationen üblich.';
+    } else {
+      einordnung =
+        'Du hast in mehreren Bereichen einen hohen Bedarf angegeben. Hier wird oft ein umfangreicheres, engmaschiges Unterstützungssetting besprochen.';
+    }
+
+    out.hidden = false;
+    out.innerHTML = `
+      <p style="margin:0 0 .5rem">Grober Orientierungsrahmen:</p>
+      <p style="font-size:1.35rem;margin:0"><strong>ca. ${unten}–${oben} Stunden pro Woche</strong></p>
+      <hr style="margin:1rem 0">
+      <p style="margin:0">${einordnung}</p>
+      <p class="small muted" style="margin:.75rem 0 0">
+        Wichtig: Das ist nur eine sehr grobe Hausnummer, keine Zusage und keine Bedarfsfeststellung.
+        Der reale Umfang wird individuell ermittelt.
+      </p>
+    `;
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+</script>

@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Seite nicht gefunden" noindex={true}>
+  <div class="container prose article" style="text-align:center; padding-block:4rem;">
+    <p class="badge">Fehler 404</p>
+    <h1>Diese Seite gibt es nicht (mehr)</h1>
+    <p class="lead muted">
+      Der Link ist vielleicht veraltet oder enthält einen Tippfehler. Hier geht es weiter:
+    </p>
+    <div class="hero-actions" style="justify-content:center;">
+      <a href="/" class="btn">Zur Startseite</a>
+      <a href="/ratgeber/" class="btn btn-secondary">Zum Ratgeber</a>
+      <a href="/tools/" class="btn btn-secondary">Zu den Tools</a>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,152 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { SITE_TAGLINE } from '../consts';
+
+const articles = (await getCollection('ratgeber', ({ data }) => !data.draft))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
+
+const tools = [
+  {
+    href: '/tools/fristenrechner',
+    title: 'Fristenrechner',
+    desc: 'Widerspruchsfrist ab Zustelldatum deines Bescheids berechnen.',
+  },
+  {
+    href: '/tools/assistenzstunden-orientierung',
+    title: 'Assistenzstunden-Orientierung',
+    desc: 'Grobe Orientierung, welcher Unterstützungsumfang zu deiner Situation passen könnte.',
+  },
+  {
+    href: '/tools/widerspruch-generator',
+    title: 'Muster-Widerspruch-Generator',
+    desc: 'Bausteinbasierter Entwurf für ein Widerspruchsschreiben zum Selbstanpassen.',
+  },
+];
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="container">
+      <span class="badge">Eingliederungshilfe nach § 113 SGB IX</span>
+      <h1>{SITE_TAGLINE}</h1>
+      <p class="lead">
+        Bescheid bekommen und nichts verstanden? Antrag steht an? Hier findest du praxisnahe
+        Erklärungen und kostenlose Tools — geschrieben aus echter Erfahrung im psychiatrischen
+        Betreuten Wohnen, nicht aus einem Jura-Lehrbuch.
+      </p>
+      <div class="hero-actions">
+        <a href="/ratgeber/" class="btn">Zum Ratgeber</a>
+        <a href="/tools/" class="btn btn-secondary">Tools ausprobieren</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <h2>Womit fangen die meisten an?</h2>
+    <ul class="card-grid">
+      <li class="card">
+        <h3>„Ich habe einen Bescheid bekommen“</h3>
+        <p>
+          Wichtigste erste Frage: Läuft schon eine Frist? Der Fristenrechner sagt es dir in
+          Sekunden.
+        </p>
+        <a href="/tools/fristenrechner" class="btn btn-secondary">Frist prüfen</a>
+      </li>
+      <li class="card">
+        <h3>„Ich verstehe die Abkürzungen nicht“</h3>
+        <p>ICF, BEI, PerSEH, Regelbedarf – im Glossar in verständlicher Sprache erklärt.</p>
+        <a href="/glossar/" class="btn btn-secondary">Zum Glossar</a>
+      </li>
+      <li class="card">
+        <h3>„Ich will den Prozess von Anfang an verstehen“</h3>
+        <p>Der Ratgeber führt dich Schritt für Schritt vom Antrag bis zum Hilfeplan.</p>
+        <a href="/ratgeber/" class="btn btn-secondary">Zum Ratgeber</a>
+      </li>
+    </ul>
+  </section>
+
+  {
+    articles.length > 0 && (
+      <section class="container section">
+        <div class="section-head">
+          <h2>Neu im Ratgeber</h2>
+          <a href="/ratgeber/" class="small">Alle Artikel →</a>
+        </div>
+        <ul class="card-grid">
+          {articles.map((a) => (
+            <li class="card">
+              <h3>
+                <a href={`/ratgeber/${a.id}/`} class="card-link">
+                  {a.data.title}
+                </a>
+              </h3>
+              <p>{a.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="container section">
+    <div class="section-head">
+      <h2>Kostenlose Tools</h2>
+      <a href="/tools/" class="small">Alle Tools →</a>
+    </div>
+    <ul class="card-grid">
+      {
+        tools.map((t) => (
+          <li class="card">
+            <h3>
+              <a href={t.href} class="card-link">
+                {t.title}
+              </a>
+            </h3>
+            <p>{t.desc}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container section trust">
+    <div class="trust-box">
+      <h2>Warum diese Seite?</h2>
+      <p>
+        Ich arbeite als Heilerziehungspfleger (HEP) im psychiatrischen Betreuten Wohnen und
+        begleite Menschen durch Bedarfsermittlung, Hilfeplanung und Bescheide. Diese Seite bündelt,
+        was ich Betroffenen und Angehörigen immer wieder erkläre — verständlich und unabhängig.
+      </p>
+      <a href="/ueber-mich" class="btn btn-secondary">Mehr über mich</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-block: 2.5rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .section-head h2 {
+    margin-top: 0;
+  }
+  .card h3 {
+    margin-bottom: 0.5rem;
+  }
+  .trust-box {
+    background: var(--color-accent);
+    border-radius: var(--radius);
+    padding: 2rem;
+    max-width: var(--readw);
+  }
+  .trust-box h2 {
+    margin-top: 0;
+  }
+</style>

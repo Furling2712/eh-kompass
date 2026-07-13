@@ -1,0 +1,134 @@
+---
+import { SITE_TITLE, NAV_LINKS } from '../consts';
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href.replace(/\/$/, ''));
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand" aria-label={`${SITE_TITLE} Startseite`}>
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span class="brand-name">{SITE_TITLE}</span>
+    </a>
+
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true" />
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Menü öffnen">
+      <span></span><span></span><span></span>
+    </label>
+
+    <nav class="site-nav" aria-label="Hauptnavigation">
+      <ul>
+        {
+          NAV_LINKS.map((link) => (
+            <li>
+              <a href={link.href} aria-current={isActive(link.href) ? 'page' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: #fff;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4rem;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-text);
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .brand-mark {
+    background: var(--color-primary);
+    color: #fff;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+  .site-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+  }
+  .site-nav a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+  .site-nav a:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  .site-nav a[aria-current='page'] {
+    color: var(--color-primary-dark);
+    background: var(--color-accent);
+  }
+  .nav-toggle,
+  .nav-toggle-label {
+    display: none;
+  }
+
+  @media (max-width: 720px) {
+    .nav-toggle-label {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 2.5rem;
+      height: 2.5rem;
+      cursor: pointer;
+    }
+    .nav-toggle-label span {
+      display: block;
+      height: 2px;
+      width: 1.4rem;
+      background: var(--color-text);
+      margin-inline: auto;
+      border-radius: 2px;
+    }
+    .site-nav {
+      display: none;
+      width: 100%;
+      order: 3;
+    }
+    .site-nav ul {
+      flex-direction: column;
+      padding-bottom: 0.75rem;
+    }
+    .site-nav a {
+      padding: 0.65rem 0.5rem;
+    }
+    .nav-toggle:checked ~ .site-nav {
+      display: block;
+    }
+  }
+</style>

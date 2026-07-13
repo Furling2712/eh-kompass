@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Checkout-Link vor Launch durch echten Gumroad-/Lemonsqueezy-Link ersetzen.
+const CHECKOUT_URL = '#';
+
+const inhalte = [
+  'Checkliste „Bescheid erhalten – was jetzt?“ (druckbar)',
+  'Vorbereitungsbogen für die Bedarfsermittlung (BEI/PerSEH)',
+  'Gesprächsleitfaden: Was will ich im Hilfeplangespräch sagen?',
+  'Muster-Widerspruch als bearbeitbare Vorlage (.docx)',
+  'Übersicht: Wichtige Fristen und Ansprechstellen',
+];
+---
+
+<BaseLayout
+  title="Vorlagen-Paket"
+  description="Das Vorlagen-Paket „Hilfeplan-Vorbereitung“: Checklisten, Gesprächsleitfäden und Muster für die Eingliederungshilfe."
+>
+  <div class="container prose article">
+    <span class="badge">Digitalprodukt</span>
+    <h1>Vorlagen-Paket „Hilfeplan-Vorbereitung“</h1>
+    <p class="lead muted">
+      Gut vorbereitet ins Bedarfsermittlungs- und Hilfeplangespräch: Checklisten,
+      Gesprächsleitfäden und bearbeitbare Muster als Sofort-Download.
+    </p>
+
+    <div class="notice">
+      <strong>⚠️ Vor Launch einrichten</strong>
+      <p style="margin-bottom:0">
+        Lege das Produkt bei Gumroad oder Lemonsqueezy an und trage den Checkout-Link in
+        <code>src/pages/vorlagen/index.astro</code> (Variable <code>CHECKOUT_URL</code>) ein.
+        Passe Inhalt und Preis an dein reales Paket an.
+      </p>
+    </div>
+
+    <div class="product">
+      <div class="product-info">
+        <h2 style="margin-top:0">Was ist enthalten?</h2>
+        <ul>
+          {inhalte.map((i) => <li>{i}</li>)}
+        </ul>
+        <p class="small muted">
+          Format: PDF und bearbeitbare Dokumente · Sofort-Download nach dem Kauf · Für den privaten
+          Gebrauch.
+        </p>
+      </div>
+
+      <aside class="product-buy">
+        <p class="price">
+          9,90 € <span class="small muted">einmalig</span>
+        </p>
+        <a href={CHECKOUT_URL} class="btn" style="width:100%;text-align:center">
+          Jetzt herunterladen
+        </a>
+        <p class="small muted" style="margin:.75rem 0 0">
+          Sichere Abwicklung über einen externen Zahlungsdienstleister.
+        </p>
+      </aside>
+    </div>
+
+    <h2>Für wen ist das Paket gedacht?</h2>
+    <p>
+      Für Betroffene und Angehörige, die vor einem Bedarfsermittlungs- oder Hilfeplangespräch stehen
+      und nicht unvorbereitet hineingehen möchten. Die Vorlagen sind aus der Praxis heraus
+      entwickelt und in verständlicher Sprache gehalten.
+    </p>
+
+    <div class="notice">
+      <strong>Hinweis</strong>
+      <p style="margin-bottom:0">
+        Die Vorlagen sind allgemeine Hilfsmittel und ersetzen keine individuelle Beratung. Prüfe
+        immer, ob die Inhalte zu deiner konkreten Situation und deinem Bundesland passen.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .product {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin: 1.5rem 0;
+  }
+  .product-buy {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    position: sticky;
+    top: 5rem;
+  }
+  .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0 0 1rem;
+  }
+  @media (max-width: 700px) {
+    .product {
+      grid-template-columns: 1fr;
+    }
+    .product-buy {
+      position: static;
+    }
+  }
+</style>

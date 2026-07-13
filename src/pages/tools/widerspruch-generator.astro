@@ -1,0 +1,329 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+
+// Generische Begründungsbausteine. Bewusst allgemein gehalten (keine Einzelfall-/Erfolgsprognose, RDG).
+const bausteine = [
+  {
+    id: 'hoehe',
+    label: 'Der bewilligte Umfang / die Höhe der Leistung erscheint mir zu gering.',
+  },
+  {
+    id: 'ablehnung',
+    label: 'Die Leistung wurde ganz oder teilweise abgelehnt.',
+  },
+  {
+    id: 'bedarf',
+    label: 'Mein tatsächlicher Bedarf wurde aus meiner Sicht nicht vollständig berücksichtigt.',
+  },
+  {
+    id: 'begruendung',
+    label: 'Die Begründung des Bescheids ist für mich nicht nachvollziehbar.',
+  },
+  {
+    id: 'anhoerung',
+    label: 'Ich hatte keine ausreichende Gelegenheit, meine Sicht darzustellen.',
+  },
+];
+---
+
+<BaseLayout
+  title="Muster-Widerspruch-Generator"
+  description="Erstelle aus Textbausteinen einen anpassbaren Entwurf für dein Widerspruchsschreiben gegen einen Eingliederungshilfe-Bescheid. Kein Ersatz für Rechtsberatung."
+>
+  <div class="container prose article">
+    <span class="badge">Tool · Vorlage</span>
+    <h1>Muster-Widerspruch-Generator</h1>
+    <p class="lead muted">
+      Dieses Tool stellt aus Textbausteinen einen <strong>Entwurf</strong> für dein
+      Widerspruchsschreiben zusammen. Du kannst ihn frei anpassen, kopieren oder herunterladen und
+      reichst ihn selbst bei der Behörde ein.
+    </p>
+
+    <div class="notice">
+      <strong>Kein Ersatz für Rechtsberatung</strong>
+      <p style="margin-bottom:0">
+        Der Generator kombiniert nur allgemeine Formulierungen – wie ein Musterbrief in einem
+        Ratgeber. Er nimmt <strong>keine</strong> rechtliche Bewertung deines Einzelfalls vor und
+        gibt keine Erfolgsprognose ab. Für eine inhaltliche Prüfung wende dich an eine
+        Sozialberatung, einen Sozialverband (VdK/SoVD) oder einen Fachanwalt für Sozialrecht.
+      </p>
+    </div>
+
+    <div class="tool-box">
+      <form id="wg-form">
+        <h3 style="margin-top:0">1. Deine Angaben</h3>
+        <div class="grid2">
+          <div class="field">
+            <label for="name">Dein Name</label>
+            <input type="text" id="name" placeholder="Vor- und Nachname" />
+          </div>
+          <div class="field">
+            <label for="adresse">Deine Anschrift</label>
+            <input type="text" id="adresse" placeholder="Straße, PLZ Ort" />
+          </div>
+        </div>
+
+        <h3>2. Angaben zum Bescheid</h3>
+        <div class="grid2">
+          <div class="field">
+            <label for="behoerde">Behörde / Kostenträger</label>
+            <input type="text" id="behoerde" placeholder="z. B. LVR / Bezirksregierung / Kreis …" />
+          </div>
+          <div class="field">
+            <label for="behoerde-adresse">Anschrift der Behörde</label>
+            <input type="text" id="behoerde-adresse" placeholder="Straße, PLZ Ort" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="az">Aktenzeichen / Geschäftszeichen</label>
+            <input type="text" id="az" placeholder="steht oben auf dem Bescheid" />
+          </div>
+          <div class="field">
+            <label for="bescheiddatum">Datum des Bescheids</label>
+            <input type="date" id="bescheiddatum" />
+          </div>
+        </div>
+
+        <h3>3. Worum geht es?</h3>
+        <p class="small muted" style="margin-top:0">Wähle aus, was auf dich zutrifft (Mehrfachauswahl möglich).</p>
+        {
+          bausteine.map((b) => (
+            <label class="check">
+              <input type="checkbox" value={b.id} data-baustein />
+              <span>{b.label}</span>
+            </label>
+          ))
+        }
+
+        <div class="field" style="margin-top:1.1rem">
+          <label for="eigenerText">Eigene Ergänzung (optional)</label>
+          <textarea
+            id="eigenerText"
+            rows="4"
+            placeholder="Beschreibe in eigenen Worten, warum du mit dem Bescheid nicht einverstanden bist. Konkrete Beispiele aus deinem Alltag helfen."
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label class="check">
+            <input type="checkbox" id="begruendungNachreichen" />
+            <span>Ich möchte die ausführliche Begründung später nachreichen.</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="ort">Ort</label>
+          <input type="text" id="ort" placeholder="Ort für die Unterschriftzeile" />
+        </div>
+
+        <button type="submit" class="btn">Entwurf erstellen</button>
+      </form>
+    </div>
+
+    <div id="wg-output-wrap" hidden>
+      <h2>Dein Entwurf</h2>
+      <p class="small muted">
+        Prüfe und ergänze den Text, bevor du ihn verschickst. Alles in eckigen Klammern
+        <code>[…]</code> solltest du noch ausfüllen oder anpassen.
+      </p>
+      <div class="output-actions">
+        <button type="button" id="copyBtn" class="btn btn-secondary">In Zwischenablage kopieren</button>
+        <button type="button" id="downloadBtn" class="btn btn-secondary">Als .txt herunterladen</button>
+        <span id="copyStatus" class="small" aria-live="polite"></span>
+      </div>
+      <textarea id="wg-output" rows="24" class="output-area" spellcheck="false"></textarea>
+    </div>
+
+    <h2>Nach dem Erstellen: so geht es weiter</h2>
+    <ul>
+      <li>Widerspruch möglichst <strong>schriftlich</strong> und fristgerecht einreichen (<a href="/tools/fristenrechner">Frist prüfen</a>).</li>
+      <li>Unterschreiben nicht vergessen. Versand am besten nachweisbar (z. B. Einwurf-Einschreiben).</li>
+      <li>Eine Kopie für deine Unterlagen behalten.</li>
+      <li>Eine ausführliche Begründung kannst du auch später nachreichen – kündige das im Schreiben an.</li>
+    </ul>
+
+    <Disclaimer
+      stand="Juli 2026"
+      quelle="https://www.gesetze-im-internet.de/sgg/__84.html"
+      quelleLabel="§ 84 SGG"
+    />
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-weight: 400;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+  }
+  .check input {
+    width: auto;
+    margin-top: 0.3rem;
+    flex: 0 0 auto;
+  }
+  .output-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+  .output-area {
+    width: 100%;
+    font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  @media (max-width: 600px) {
+    .grid2 {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const bausteinTexte: Record<string, string> = {
+    hoehe:
+      'Der mit dem Bescheid bewilligte Umfang der Leistung entspricht aus meiner Sicht nicht meinem tatsächlichen Unterstützungsbedarf.',
+    ablehnung:
+      'Die von mir beantragte Leistung wurde ganz oder teilweise abgelehnt. Damit bin ich nicht einverstanden.',
+    bedarf:
+      'Mein tatsächlicher Bedarf wurde aus meiner Sicht im Verfahren nicht vollständig erfasst bzw. berücksichtigt.',
+    begruendung:
+      'Die Begründung des Bescheids ist für mich nicht nachvollziehbar. Ich bitte um eine verständliche Darstellung der Entscheidungsgründe.',
+    anhoerung:
+      'Ich hatte aus meiner Sicht keine ausreichende Gelegenheit, meine persönliche Situation und meinen Bedarf darzustellen.',
+  };
+
+  const form = document.getElementById('wg-form') as HTMLFormElement;
+  const outWrap = document.getElementById('wg-output-wrap') as HTMLDivElement;
+  const outArea = document.getElementById('wg-output') as HTMLTextAreaElement;
+  const val = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value.trim();
+
+  const fmtDate = (v: string) => {
+    if (!v) return '[Datum des Bescheids]';
+    const [y, m, d] = v.split('-');
+    return `${d}.${m}.${y}`;
+  };
+
+  function todayLong(): string {
+    // Erlaubt: Anzeige des heutigen Datums in der Unterschriftzeile.
+    return new Intl.DateTimeFormat('de-DE', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date());
+  }
+
+  function build(): string {
+    const name = val('name') || '[Dein Name]';
+    const adresse = val('adresse') || '[Deine Anschrift]';
+    const behoerde = val('behoerde') || '[Behörde / Kostenträger]';
+    const behoerdeAdr = val('behoerde-adresse') || '[Anschrift der Behörde]';
+    const az = val('az') || '[Aktenzeichen]';
+    const bescheiddatum = fmtDate(val('bescheiddatum'));
+    const ort = val('ort') || '[Ort]';
+    const eigener = val('eigenerText');
+    const nachreichen = (document.getElementById('begruendungNachreichen') as HTMLInputElement).checked;
+
+    const gewaehlt = Array.from(
+      form.querySelectorAll<HTMLInputElement>('input[data-baustein]:checked')
+    ).map((c) => bausteinTexte[c.value]);
+
+    const gruende =
+      gewaehlt.length > 0
+        ? gewaehlt.map((g) => `- ${g}`).join('\n')
+        : '- [Bitte hier ergänzen, warum du mit dem Bescheid nicht einverstanden bist.]';
+
+    const eigenerBlock = eigener ? `\n\n${eigener}` : '';
+
+    const begruendungSchluss = nachreichen
+      ? 'Eine ausführliche Begründung meines Widerspruchs werde ich zeitnah nachreichen.'
+      : 'Ich bitte um erneute Prüfung und um einen entsprechend abgeänderten Bescheid.';
+
+    return `${name}
+${adresse}
+
+
+${behoerde}
+${behoerdeAdr}
+
+
+${ort}, den ${todayLong()}
+
+
+Widerspruch gegen den Bescheid vom ${bescheiddatum}
+Aktenzeichen: ${az}
+
+
+Sehr geehrte Damen und Herren,
+
+gegen den oben genannten Bescheid vom ${bescheiddatum} lege ich hiermit fristgerecht
+
+                                   W i d e r s p r u c h
+
+ein.
+
+Ich bin mit der Entscheidung aus folgenden Gründen nicht einverstanden:
+
+${gruende}${eigenerBlock}
+
+${begruendungSchluss}
+
+Ich bitte um eine schriftliche Eingangsbestätigung.
+
+
+Mit freundlichen Grüßen
+
+
+
+
+_______________________
+${name}`;
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    outArea.value = build();
+    outWrap.hidden = false;
+    outWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  const status = document.getElementById('copyStatus') as HTMLSpanElement;
+
+  document.getElementById('copyBtn')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(outArea.value);
+      status.textContent = '✓ Kopiert';
+    } catch {
+      outArea.select();
+      status.textContent = 'Bitte mit Strg+C kopieren';
+    }
+    setTimeout(() => (status.textContent = ''), 2500);
+  });
+
+  document.getElementById('downloadBtn')?.addEventListener('click', () => {
+    const blob = new Blob([outArea.value], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'widerspruch-entwurf.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+</script>

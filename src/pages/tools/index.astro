@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const tools = [
+  {
+    href: '/tools/fristenrechner',
+    title: 'Fristenrechner',
+    desc: 'Berechne die Widerspruchsfrist ab dem Zustelldatum deines Bescheids – inklusive Wochenend-/Feiertagsregel.',
+    tag: 'Frist',
+  },
+  {
+    href: '/tools/assistenzstunden-orientierung',
+    title: 'Assistenzstunden-Orientierung',
+    desc: 'Grobe Orientierung, welcher Unterstützungsumfang zu deiner Lebenssituation passen könnte. Keine Bedarfsfeststellung.',
+    tag: 'Orientierung',
+  },
+  {
+    href: '/tools/widerspruch-generator',
+    title: 'Muster-Widerspruch-Generator',
+    desc: 'Erzeugt aus Textbausteinen einen Entwurf für dein Widerspruchsschreiben, den du anpassen und selbst einreichen kannst.',
+    tag: 'Vorlage',
+  },
+];
+---
+
+<BaseLayout
+  title="Tools"
+  description="Kostenlose, datensparsame Tools zur Eingliederungshilfe: Fristenrechner, Assistenzstunden-Orientierung und Muster-Widerspruch-Generator."
+>
+  <div class="container prose article">
+    <h1>Tools</h1>
+    <p class="lead muted">
+      Alle Tools laufen direkt in deinem Browser. Deine Eingaben verlassen dein Gerät nicht und
+      werden nirgends gespeichert.
+    </p>
+  </div>
+
+  <div class="container">
+    <ul class="card-grid">
+      {
+        tools.map((t) => (
+          <li class="card">
+            <span class="badge">{t.tag}</span>
+            <h3>
+              <a href={t.href} class="card-link">
+                {t.title}
+              </a>
+            </h3>
+            <p>{t.desc}</p>
+            <a href={t.href} class="btn btn-secondary">
+              Öffnen
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 0.5rem;
+  }
+</style>
