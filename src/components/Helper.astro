@@ -12,7 +12,16 @@ const tip = findHelperTip(Astro.url.pathname);
     aria-expanded="false"
     aria-controls="eh-helper-panel"
   >
-    <span aria-hidden="true">💬</span>
+    <svg class="helper-owl" viewBox="0 0 64 64" aria-hidden="true">
+      <ellipse cx="32" cy="36" rx="22" ry="20" fill="#8a6b4f" />
+      <path d="M12 20 L20 4 L26 18 Z" fill="#8a6b4f" />
+      <path d="M52 20 L44 4 L38 18 Z" fill="#8a6b4f" />
+      <circle cx="22" cy="32" r="11" fill="#fff" />
+      <circle cx="42" cy="32" r="11" fill="#fff" />
+      <circle class="helper-owl-pupil" cx="22" cy="32" r="5" fill="#2b2117" />
+      <circle class="helper-owl-pupil" cx="42" cy="32" r="5" fill="#2b2117" />
+      <path d="M29 42 L32 47 L35 42 Z" fill="#e8a33d" />
+    </svg>
     <span class="visually-hidden">Hilfe zur Navigation öffnen</span>
   </button>
 
@@ -57,6 +66,30 @@ const tip = findHelperTip(Astro.url.pathname);
 
   .helper-toggle:hover {
     background: var(--color-primary-dark);
+  }
+
+  .helper-owl {
+    width: 2.1rem;
+    height: 2.1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .helper-toggle:hover .helper-owl {
+    transform: rotate(-6deg) scale(1.05);
+  }
+
+  .helper-owl-pupil {
+    animation: helper-owl-blink 4.5s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  @keyframes helper-owl-blink {
+    0%, 92%, 100% {
+      transform: scaleY(1);
+    }
+    95% {
+      transform: scaleY(0.1);
+    }
   }
 
   .helper-panel {

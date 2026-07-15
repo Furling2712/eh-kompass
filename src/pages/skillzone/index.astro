@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CrisisNotice from '../../components/CrisisNotice.astro';
+import { getCollection } from 'astro:content';
+import { produkte } from '../../data/shop-produkte';
+
+// Checkout-Link vor Launch durch echten Gumroad-/Lemonsqueezy-Link für das Premium-Paket ersetzen.
+const PREMIUM_CHECKOUT_URL = '#';
+
+const kostenlos = [
+  {
+    href: '/skillzone/atemuebung',
+    title: 'Box-Atmung',
+    desc: 'Ein animierter Kreis führt dich durch einen ruhigen 4-4-4-4-Atemrhythmus.',
+    icon: '🫁',
+  },
+  {
+    href: '/skillzone/erdung-54321',
+    title: '5-4-3-2-1 Erdungsübung',
+    desc: 'Schritt für Schritt über die Sinne zurück ins Hier und Jetzt.',
+    icon: '🖐️',
+  },
+  {
+    href: '/skillzone/fokus-spiel',
+    title: 'Blasen zerplatzen',
+    desc: 'Ruhiges Ablenkungsspiel für den Kopf – ohne Punktedruck, ohne Verlieren.',
+    icon: '🫧',
+  },
+];
+
+const premiumInhalte = (await getCollection('skillzone', ({ data }) => data.premium && !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
+---
+
+<BaseLayout
+  title="Skill-Zone"
+  description="Kostenlose Selbstregulations-Übungen für den Moment, in dem es gerade zu viel wird – Atmung, Erdung und Ablenkung. Plus Premium-Inhalte und Skill-Artikel zum Bestellen."
+>
+  <div class="container prose article">
+    <span class="badge">Für dich</span>
+    <h1>Skill-Zone</h1>
+    <p class="lead muted">
+      Werkzeuge für den Moment, wenn Anspannung, Ärger oder Krise gerade sehr hoch sind. Kurz,
+      einfach, sofort nutzbar – ganz ohne Anmeldung.
+    </p>
+
+    <CrisisNotice />
+
+    <h2>Kostenlose Übungen</h2>
+    <ul class="card-grid">
+      {
+        kostenlos.map((k) => (
+          <li class="card">
+            <h3>
+              <a href={k.href} class="card-link">
+                <span aria-hidden="true">{k.icon}</span> {k.title}
+              </a>
+            </h3>
+            <p>{k.desc}</p>
+            <a href={k.href} class="btn btn-secondary">
+              Jetzt machen
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2>Premium: mehr Skills freischalten</h2>
+    <p class="muted">
+      Ausführlichere Übungen mit gesprochenem Audio – einmalig freischalten, dauerhaft nutzen.
+    </p>
+    <ul class="card-grid">
+      {
+        premiumInhalte.map((p) => (
+          <li class="card card-locked">
+            <h3>
+              <span aria-hidden="true">🔒</span> {p.data.title}
+            </h3>
+            <p>{p.data.description}</p>
+            <a href={PREMIUM_CHECKOUT_URL} class="btn">
+              Freischalten
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    {
+      skillProdukte.length > 0 && (
+        <>
+          <h2>Zum Anfassen: Skill-Artikel im Shop</h2>
+          <p class="muted">
+            Manche Skills wirken über den Körper – ein Skillball, ein intensiver Geruchs- oder
+            Geschmacksreiz. Unabhängig vom Premium-Paket direkt bestellbar.
+          </p>
+          <ul class="card-grid">
+            {skillProdukte.map((p) => (
+              <li class="card">
+                <a href={`/shop/${p.id}/`} class="card-link">
+                  <img src={p.bild} alt={p.name} class="produkt-bild" />
+                  <h3>{p.name}</h3>
+                </a>
+                <p>{p.beschreibung}</p>
+                <p class="preis">{p.preis.toFixed(2)} €</p>
+                <a href={`/shop/${p.id}/`} class="btn btn-secondary">
+                  Ansehen
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .card-locked {
+    opacity: 0.9;
+  }
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .produkt-bild {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    background: var(--color-surface);
+  }
+  .preis {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0.25rem 0;
+  }
+</style>

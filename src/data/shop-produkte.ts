@@ -4,7 +4,7 @@
 // src/pages/shop/warenkorb/index.astro. BESTELL_EMAIL unten vor dem Launch
 // durch die echte Adresse des Systemikers ersetzen.
 
-export const BESTELL_EMAIL = 'bestellung@beispiel.de'; // TODO: echte Adresse eintragen
+export const BESTELL_EMAIL = 'alexander.radler@ptv-euregio.de'; // TODO: echte Adresse eintragen
 
 export interface ShopProdukt {
   id: string;
@@ -36,6 +36,50 @@ export const produkte: ShopProdukt[] = [
     bild: '/images/shop/aufstellungsbrett.png',
     kategorie: 'Therapie & Pädagogik',
     lieferzeit: '5–10 Werktage',
-    anbieter: 'Unser Systemiker',
+    anbieter: 'PTV-Euregio e.V.',
+  },
+  {
+    id: 'skillball',
+    name: 'Skillball',
+    beschreibung:
+      'Ein griffiger Knautschball für die Hosentasche. Hilft, körperliche Anspannung in akuten Momenten über die Hände abzuleiten – ein einfacher, jederzeit verfügbarer Skill.',
+    details: [
+      'Angenehme, griffige Oberflächenstruktur',
+      'Passt in jede Tasche',
+      'Waschbar',
+    ],
+    preis: 6.9,
+    bild: '/images/shop/Skillball.png',
+    kategorie: 'Skills',
+    lieferzeit: '3–5 Werktage',
+    anbieter: 'PTV-Euregio e.V.',
+  },
+  {
+    id: 'riechstaebchen',
+    name: 'Riechstäbchen',
+    beschreibung:
+      'Ein intensiver Geruchsreiz kann in Momenten von Dissoziation oder starker Anspannung helfen, wieder im Hier und Jetzt anzukommen. 10 Riechampullen aus Glas für den Krisenkoffer oder die Hosentasche.',
+    details: ['10 Riechampullen aus Glas à 0,4 ml', 'Intensiver, kurzer Reiz', 'Ergiebig'],
+    preis: 8.5,
+    bild: '/images/shop/Riechst%C3%A4bchen.png',
+    kategorie: 'Skills',
+    lieferzeit: '3–5 Werktage',
+    anbieter: 'PTV-Euregio e.V.',
+  },
+  {
+    id: 'himbeer-chili-bonbons',
+    name: 'Himbeer-Chili Bonbons',
+    beschreibung:
+      'Ein starker Geschmacksreiz als Skill gegen Anspannung und Dissoziation (bekannt aus der DBT-Skills-Arbeit) – fruchtig-scharfe Bonbons mit Himbeere und Chili. 200g-Beutel für den Krisenkoffer.',
+    details: [
+      '200g-Beutel, wiederverschließbar',
+      'Fruchtig-scharfer Geschmacksreiz',
+      'Für den Krisenkoffer geeignet',
+    ],
+    preis: 5.9,
+    bild: '/images/shop/Himbeer%20Chilli%20Skillbonbons.png',
+    kategorie: 'Skills',
+    lieferzeit: '3–5 Werktage',
+    anbieter: 'PTV-Euregio e.V.',
   },
 ];

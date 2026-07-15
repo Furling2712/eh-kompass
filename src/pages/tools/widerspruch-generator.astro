@@ -53,26 +53,42 @@ const bausteine = [
     <div class="tool-box">
       <form id="wg-form">
         <h3 style="margin-top:0">1. Deine Angaben</h3>
-        <div class="grid2">
+        <div class="field">
+          <label for="name">Dein Name</label>
+          <input type="text" id="name" placeholder="Vor- und Nachname" />
+        </div>
+        <div class="field">
+          <label for="strasse">Straße und Hausnummer</label>
+          <input type="text" id="strasse" placeholder="Musterstraße 1" />
+        </div>
+        <div class="grid2 grid2-plz">
           <div class="field">
-            <label for="name">Dein Name</label>
-            <input type="text" id="name" placeholder="Vor- und Nachname" />
+            <label for="plz">PLZ</label>
+            <input type="text" id="plz" placeholder="12345" inputmode="numeric" />
           </div>
           <div class="field">
-            <label for="adresse">Deine Anschrift</label>
-            <input type="text" id="adresse" placeholder="Straße, PLZ Ort" />
+            <label for="ort">Ort</label>
+            <input type="text" id="ort" placeholder="Musterstadt" />
           </div>
         </div>
 
         <h3>2. Angaben zum Bescheid</h3>
-        <div class="grid2">
+        <div class="field">
+          <label for="behoerde">Behörde / Kostenträger</label>
+          <input type="text" id="behoerde" placeholder="z. B. LVR / Bezirksregierung / Kreis …" />
+        </div>
+        <div class="field">
+          <label for="behoerde-strasse">Straße und Hausnummer der Behörde</label>
+          <input type="text" id="behoerde-strasse" placeholder="Musterallee 1" />
+        </div>
+        <div class="grid2 grid2-plz">
           <div class="field">
-            <label for="behoerde">Behörde / Kostenträger</label>
-            <input type="text" id="behoerde" placeholder="z. B. LVR / Bezirksregierung / Kreis …" />
+            <label for="behoerde-plz">PLZ</label>
+            <input type="text" id="behoerde-plz" placeholder="54321" inputmode="numeric" />
           </div>
           <div class="field">
-            <label for="behoerde-adresse">Anschrift der Behörde</label>
-            <input type="text" id="behoerde-adresse" placeholder="Straße, PLZ Ort" />
+            <label for="behoerde-ort">Ort</label>
+            <input type="text" id="behoerde-ort" placeholder="Musterstadt" />
           </div>
         </div>
         <div class="grid2">
@@ -113,11 +129,6 @@ const bausteine = [
           </label>
         </div>
 
-        <div class="field">
-          <label for="ort">Ort</label>
-          <input type="text" id="ort" placeholder="Ort für die Unterschriftzeile" />
-        </div>
-
         <button type="submit" class="btn">Entwurf erstellen</button>
       </form>
     </div>
@@ -130,10 +141,17 @@ const bausteine = [
       </p>
       <div class="output-actions">
         <button type="button" id="copyBtn" class="btn btn-secondary">In Zwischenablage kopieren</button>
-        <button type="button" id="downloadBtn" class="btn btn-secondary">Als .txt herunterladen</button>
+        <button type="button" id="pdfBtn" class="btn btn-secondary">Als PDF herunterladen</button>
+        <button type="button" id="docxBtn" class="btn btn-secondary">Als Word (.docx) herunterladen</button>
+        <button type="button" id="odtBtn" class="btn btn-secondary">Als OpenDocument (.odt) herunterladen</button>
         <span id="copyStatus" class="small" aria-live="polite"></span>
       </div>
-      <textarea id="wg-output" rows="24" class="output-area" spellcheck="false"></textarea>
+      <p class="small muted" style="margin:0 0 .75rem">
+        Das .odt-Format öffnet sich direkt in LibreOffice und Apache OpenOffice.
+      </p>
+      <div class="output-page-wrap">
+        <textarea id="wg-output" class="output-page" spellcheck="false"></textarea>
+      </div>
     </div>
 
     <h2>Nach dem Erstellen: so geht es weiter</h2>
@@ -161,6 +179,9 @@ const bausteine = [
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
+  .grid2-plz {
+    grid-template-columns: 8rem 1fr;
+  }
   .check {
     display: flex;
     align-items: flex-start;
@@ -181,20 +202,46 @@ const bausteine = [
     flex-wrap: wrap;
     margin-bottom: 0.75rem;
   }
-  .output-area {
+  .output-page-wrap {
+    display: flex;
+    justify-content: center;
+    background: var(--color-accent);
+    padding: 2rem 1rem;
+    border-radius: var(--radius);
+  }
+  .output-page {
     width: 100%;
-    font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
-    font-size: 0.92rem;
-    line-height: 1.55;
+    max-width: 21cm;
+    aspect-ratio: 210 / 297;
+    background: #fff;
+    color: #1a1a1a;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+    padding: 2.5cm 2cm;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    resize: vertical;
   }
   @media (max-width: 600px) {
     .grid2 {
       grid-template-columns: 1fr;
     }
+    .grid2-plz {
+      grid-template-columns: 1fr;
+    }
+    .output-page {
+      aspect-ratio: auto;
+      padding: 1.25rem;
+    }
   }
 </style>
 
 <script>
+  import { jsPDF } from 'jspdf';
+  import { Document, Packer, Paragraph, TextRun } from 'docx';
+  import JSZip from 'jszip';
+
   const bausteinTexte: Record<string, string> = {
     hoehe:
       'Der mit dem Bescheid bewilligte Umfang der Leistung entspricht aus meiner Sicht nicht meinem tatsächlichen Unterstützungsbedarf.',
@@ -228,16 +275,26 @@ const bausteine = [
     }).format(new Date());
   }
 
+  // Anschrift nach DIN 5008: Name / Straße Hausnummer / PLZ Ort - jeweils eigene Zeile.
+  function anschriftZeilen(namePrefix: string, strasseId: string, plzId: string, ortId: string): string {
+    const strasse = val(strasseId) || '[Straße und Hausnummer]';
+    const plz = val(plzId);
+    const ort = val(ortId);
+    const plzOrt = plz || ort ? `${plz || '[PLZ]'} ${ort || '[Ort]'}` : '[PLZ Ort]';
+    return `${namePrefix}\n${strasse}\n${plzOrt}`;
+  }
+
   function build(): string {
     const name = val('name') || '[Dein Name]';
-    const adresse = val('adresse') || '[Deine Anschrift]';
     const behoerde = val('behoerde') || '[Behörde / Kostenträger]';
-    const behoerdeAdr = val('behoerde-adresse') || '[Anschrift der Behörde]';
     const az = val('az') || '[Aktenzeichen]';
     const bescheiddatum = fmtDate(val('bescheiddatum'));
     const ort = val('ort') || '[Ort]';
     const eigener = val('eigenerText');
     const nachreichen = (document.getElementById('begruendungNachreichen') as HTMLInputElement).checked;
+
+    const absender = anschriftZeilen(name, 'strasse', 'plz', 'ort');
+    const empfaenger = anschriftZeilen(behoerde, 'behoerde-strasse', 'behoerde-plz', 'behoerde-ort');
 
     const gewaehlt = Array.from(
       form.querySelectorAll<HTMLInputElement>('input[data-baustein]:checked')
@@ -254,12 +311,10 @@ const bausteine = [
       ? 'Eine ausführliche Begründung meines Widerspruchs werde ich zeitnah nachreichen.'
       : 'Ich bitte um erneute Prüfung und um einen entsprechend abgeänderten Bescheid.';
 
-    return `${name}
-${adresse}
+    return `${absender}
 
 
-${behoerde}
-${behoerdeAdr}
+${empfaenger}
 
 
 ${ort}, den ${todayLong()}
@@ -295,6 +350,116 @@ _______________________
 ${name}`;
   }
 
+  function currentFilename(ext: string): string {
+    const name = val('name');
+    const slug = name ? name.toLowerCase().replace(/[^a-z0-9äöüß]+/gi, '-').replace(/^-+|-+$/g, '') : 'entwurf';
+    return `widerspruch-${slug || 'entwurf'}.${ext}`;
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function buildPdf(text: string): Blob {
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const marginLeft = 25;
+    const marginRight = 20;
+    const maxWidth = 210 - marginLeft - marginRight;
+    const lineHeight = 5.2;
+    const pageBottom = 275;
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+
+    let y = 25;
+    for (const rawLine of text.split('\n')) {
+      const wrapped: string[] = rawLine.trim().length
+        ? doc.splitTextToSize(rawLine, maxWidth)
+        : [''];
+      for (const line of wrapped) {
+        if (y > pageBottom) {
+          doc.addPage();
+          y = 25;
+        }
+        if (line) doc.text(line, marginLeft, y);
+        y += lineHeight;
+      }
+    }
+    return doc.output('blob');
+  }
+
+  async function buildDocx(text: string): Promise<Blob> {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: text.split('\n').map(
+            (line) =>
+              new Paragraph({
+                children: [new TextRun({ text: line, font: 'Times New Roman', size: 22 })],
+                spacing: { after: 0 },
+              })
+          ),
+        },
+      ],
+    });
+    return Packer.toBlob(doc);
+  }
+
+  function xmlEscape(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  async function buildOdt(text: string): Promise<Blob> {
+    const paragraphs = text
+      .split('\n')
+      .map((line) => (line.trim().length ? `<text:p>${xmlEscape(line)}</text:p>` : '<text:p/>'))
+      .join('\n');
+
+    const contentXml = `<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">
+  <office:body>
+    <office:text>
+${paragraphs}
+    </office:text>
+  </office:body>
+</office:document-content>`;
+
+    const stylesXml = `<?xml version="1.0" encoding="UTF-8"?>
+<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" office:version="1.2">
+  <office:styles>
+    <style:default-style style:family="paragraph">
+      <style:text-properties style:font-name="Liberation Serif" fo:font-size="11pt"/>
+    </style:default-style>
+  </office:styles>
+</office:document-styles>`;
+
+    const manifestXml = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">
+  <manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.text"/>
+  <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+</manifest:manifest>`;
+
+    const zip = new JSZip();
+    zip.file('mimetype', 'application/vnd.oasis.opendocument.text', { compression: 'STORE' });
+    zip.file('META-INF/manifest.xml', manifestXml);
+    zip.file('content.xml', contentXml);
+    zip.file('styles.xml', stylesXml);
+
+    return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.oasis.opendocument.text' });
+  }
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     outArea.value = build();
@@ -315,15 +480,15 @@ ${name}`;
     setTimeout(() => (status.textContent = ''), 2500);
   });
 
-  document.getElementById('downloadBtn')?.addEventListener('click', () => {
-    const blob = new Blob([outArea.value], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'widerspruch-entwurf.txt';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  document.getElementById('pdfBtn')?.addEventListener('click', () => {
+    downloadBlob(buildPdf(outArea.value), currentFilename('pdf'));
+  });
+
+  document.getElementById('docxBtn')?.addEventListener('click', async () => {
+    downloadBlob(await buildDocx(outArea.value), currentFilename('docx'));
+  });
+
+  document.getElementById('odtBtn')?.addEventListener('click', async () => {
+    downloadBlob(await buildOdt(outArea.value), currentFilename('odt'));
   });
 </script>

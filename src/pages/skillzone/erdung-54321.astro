@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CrisisNotice from '../../components/CrisisNotice.astro';
+
+const schritte = [
+  { zahl: 5, sinn: 'siehst', text: 'Nenne 5 Dinge, die du gerade um dich herum siehst.' },
+  { zahl: 4, sinn: 'fühlst', text: 'Nenne 4 Dinge, die du gerade berühren oder spüren kannst.' },
+  { zahl: 3, sinn: 'hörst', text: 'Nenne 3 Geräusche, die du gerade hörst.' },
+  { zahl: 2, sinn: 'riechst', text: 'Nenne 2 Dinge, die du gerade riechst (oder riechen könntest).' },
+  { zahl: 1, sinn: 'schmeckst', text: 'Nenne 1 Ding, das du gerade schmeckst (oder schmecken könntest).' },
+];
+---
+
+<BaseLayout
+  title="5-4-3-2-1 Erdungsübung"
+  description="Kostenlose Erdungsübung gegen Anspannung und Dissoziation: Schritt für Schritt durch die 5-4-3-2-1-Methode."
+>
+  <div class="container prose article">
+    <span class="badge">Skill-Zone · Erdung · kostenlos</span>
+    <h1>5-4-3-2-1 Erdungsübung</h1>
+    <p class="lead muted">
+      Holt deine Aufmerksamkeit über die Sinne zurück ins Hier und Jetzt – hilfreich bei starker
+      Anspannung oder wenn sich alles „weit weg“ anfühlt.
+    </p>
+
+    <CrisisNotice />
+
+    <div class="ground-box">
+      <p class="ground-step-of" id="ground-step-of"></p>
+      <p class="ground-zahl" id="ground-zahl"></p>
+      <p class="ground-text" id="ground-text"></p>
+      <div class="ground-actions">
+        <button type="button" id="ground-back" class="btn btn-secondary">← Zurück</button>
+        <button type="button" id="ground-next" class="btn">Weiter</button>
+      </div>
+    </div>
+
+    <p><a href="/skillzone/">← Zurück zur Skill-Zone</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .ground-box {
+    background: var(--color-accent);
+    border-radius: var(--radius);
+    padding: 2.5rem 1.5rem;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  .ground-step-of {
+    margin: 0 0 0.5rem;
+    color: var(--color-muted);
+  }
+  .ground-zahl {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    margin: 0;
+    line-height: 1;
+  }
+  .ground-text {
+    font-size: 1.15rem;
+    max-width: 30rem;
+    margin: 0.75rem auto 1.5rem;
+  }
+  .ground-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  /* .btn setzt display:inline-block, das sonst das hidden-Attribut überschreiben würde. */
+  .btn[hidden] {
+    display: none;
+  }
+</style>
+
+<script define:vars={{ schritte }}>
+  let i = 0;
+  const stepOf = document.getElementById('ground-step-of');
+  const zahl = document.getElementById('ground-zahl');
+  const text = document.getElementById('ground-text');
+  const backBtn = document.getElementById('ground-back');
+  const nextBtn = document.getElementById('ground-next');
+
+  function render() {
+    const done = i >= schritte.length;
+    if (done) {
+      stepOf.textContent = 'Geschafft';
+      zahl.textContent = '✓';
+      text.textContent = 'Du hast alle fünf Sinne durchgegangen. Wie fühlt sich das gerade an?';
+      nextBtn.textContent = 'Nochmal von vorn';
+      backBtn.hidden = false;
+      return;
+    }
+    const s = schritte[i];
+    stepOf.textContent = `Schritt ${i + 1} von ${schritte.length}`;
+    zahl.textContent = String(s.zahl);
+    text.textContent = s.text;
+    nextBtn.textContent = i === schritte.length - 1 ? 'Fertig' : 'Weiter';
+    backBtn.hidden = i === 0;
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (i >= schritte.length) {
+      i = 0;
+    } else {
+      i += 1;
+    }
+    render();
+  });
+
+  backBtn.addEventListener('click', () => {
+    i = Math.max(0, i - 1);
+    render();
+  });
+
+  render();
+</script>

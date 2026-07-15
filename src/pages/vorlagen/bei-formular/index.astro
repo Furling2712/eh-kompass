@@ -1,0 +1,339 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+// Fragen 1:1 aus dem internen BEI-Erhebungsbogen übernommen, damit das Ergebnis
+// direkt in die bestehende interne Weiterverarbeitung importiert werden kann.
+const fragen = [
+  {
+    frage: 'Was man über mich wissen sollte',
+    hilfe: 'Besonderheiten, die im Alltag oder bei der Begleitung wichtig sind.',
+  },
+  {
+    frage: 'Was ich kann und was ich lernen könnte',
+    hilfe: 'Fähigkeiten und Entwicklungsmöglichkeiten.',
+  },
+  {
+    frage: 'Wer oder was mir hilft, so zu leben, wie ich will',
+    hilfe: 'Unterstützung oder Ressourcen, die helfen.',
+  },
+  {
+    frage: 'Was ich nicht so gut kann und ändern möchte',
+    hilfe: 'Herausforderungen oder Entwicklungsfelder.',
+  },
+  {
+    frage: 'Wer oder was mich daran hindert, so zu leben, wie ich will',
+    hilfe: 'Barrieren oder Schwierigkeiten.',
+  },
+];
+
+const ziele = [
+  { ziel: 'Wie und wo ich wohnen will', hilfe: 'Welche Wohnform wird angestrebt?' },
+  {
+    ziel: 'Was ich den Tag über tun oder arbeiten will',
+    hilfe: 'Welche Tagesstruktur oder Beschäftigung ist gewünscht?',
+  },
+  {
+    ziel: 'Wie ich mit anderen Menschen Kontakt haben möchte',
+    hilfe: 'Wie sollen soziale Kontakte aussehen?',
+  },
+  { ziel: 'Was ich in meiner Freizeit machen will', hilfe: 'Welche Freizeitgestaltung ist wichtig?' },
+  { ziel: 'Was mir sonst noch sehr wichtig ist', hilfe: 'Weitere wichtige Aspekte.' },
+];
+
+const staatsangehoerigkeiten = [
+  'deutsch', 'afghanisch', 'ägyptisch', 'albanisch', 'algerisch', 'amerikanisch', 'andorranisch',
+  'angolanisch', 'argentinisch', 'armenisch', 'australisch', 'aserbaidschanisch', 'äthiopisch',
+  'belgisch', 'bosnisch-herzegowinisch', 'brasilianisch', 'bulgarisch', 'chilenisch', 'chinesisch',
+  'dänisch', 'eritreisch', 'estnisch', 'finnisch', 'französisch', 'georgisch', 'ghanaisch',
+  'griechisch', 'indisch', 'indonesisch', 'irakisch', 'iranisch', 'irisch', 'italienisch',
+  'japanisch', 'jordanisch', 'kanadisch', 'kasachisch', 'kolumbianisch', 'kongolesisch', 'koreanisch',
+  'kosovarisch', 'kroatisch', 'kubanisch', 'lettisch', 'libanesisch', 'libysch', 'litauisch',
+  'luxemburgisch', 'marokkanisch', 'mazedonisch', 'mexikanisch', 'moldauisch', 'mongolisch',
+  'montenegrinisch', 'niederländisch', 'nigerianisch', 'norwegisch', 'österreichisch', 'pakistanisch',
+  'palästinensisch', 'philippinisch', 'polnisch', 'portugiesisch', 'rumänisch', 'russisch',
+  'schwedisch', 'schweizerisch', 'senegalesisch', 'serbisch', 'slowakisch', 'slowenisch',
+  'somalisch', 'spanisch', 'sri-lankisch', 'staatenlos', 'südafrikanisch', 'sudanesisch', 'syrisch',
+  'thailändisch', 'tschechisch', 'tunesisch', 'türkisch', 'ukrainisch', 'ungarisch', 'usbekisch',
+  'venezolanisch', 'vietnamesisch', 'andere (bitte angeben)',
+];
+---
+
+<BaseLayout
+  title="BEI-Formular"
+  description="Digitales BEI-Formular: beantworte die Fragen der Bedarfsermittlung in Ruhe online und lade das Ergebnis als Datei herunter."
+  noindex
+>
+  <div class="container prose article">
+    <span class="badge">BEI-Generierung</span>
+    <h1>Dein BEI-Formular</h1>
+    <p class="lead muted">
+      Fülle die Felder in Ruhe aus. Am Ende lädst du deine Antworten als Datei herunter, die du zu
+      deinem Termin mitbringst oder an deine Betreuung weiterleitest.
+    </p>
+
+    <div class="notice">
+      <strong>Datenschutz</strong>
+      <p style="margin-bottom:0">
+        Alles bleibt in deinem Browser. Es wird nichts automatisch gesendet – erst der
+        Download-Button am Ende erzeugt eine Datei auf deinem Gerät.
+      </p>
+    </div>
+
+    <form id="bei-form">
+      <h2>👤 Persönliche Informationen</h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="anrede">Anrede</label>
+          <select id="anrede">
+            <option>Herr</option>
+            <option>Frau</option>
+            <option>Divers</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="familienstand">Familienstand</label>
+          <select id="familienstand">
+            <option value="ledig">ledig</option>
+            <option value="verheiratet">verheiratet</option>
+            <option value="geschieden">geschieden</option>
+            <option value="verwitwet">verwitwet</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="nachname">Nachname</label>
+          <input type="text" id="nachname" />
+        </div>
+        <div class="field">
+          <label for="vorname">Vorname</label>
+          <input type="text" id="vorname" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="geburtsdatum">Geburtsdatum</label>
+        <input type="date" id="geburtsdatum" />
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label for="strasse">Straße</label>
+          <input type="text" id="strasse" />
+        </div>
+        <div class="field">
+          <label for="hausnummer">Hausnummer</label>
+          <input type="text" id="hausnummer" />
+        </div>
+        <div class="field">
+          <label for="plz">Postleitzahl</label>
+          <input type="text" id="plz" inputmode="numeric" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="wohnort">Wohnort</label>
+        <input type="text" id="wohnort" />
+      </div>
+      <div class="field">
+        <label for="staatsangehoerigkeit">Staatsangehörigkeit</label>
+        <select id="staatsangehoerigkeit">
+          {staatsangehoerigkeiten.map((s) => <option value={s}>{s}</option>)}
+        </select>
+      </div>
+      <div class="field" id="staatsangehoerigkeit-andere-wrap" hidden>
+        <label for="staatsangehoerigkeit-andere">Bitte Staatsangehörigkeit angeben</label>
+        <input type="text" id="staatsangehoerigkeit-andere" />
+      </div>
+      <div class="field">
+        <label for="behinderung">Behinderung</label>
+        <select id="behinderung">
+          <option value="keine">keine</option>
+          <option value="seelisch behindert">seelisch behindert</option>
+          <option value="körperlich behindert">körperlich behindert</option>
+          <option value="geistig behindert">geistig behindert</option>
+        </select>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="planungszeitraum-ab">Planungszeitraum ab</label>
+          <input type="date" id="planungszeitraum-ab" />
+        </div>
+        <div class="field">
+          <label for="planungszeitraum-bis">Planungszeitraum bis</label>
+          <input type="date" id="planungszeitraum-bis" />
+        </div>
+      </div>
+
+      <h2>🪞 Persönliche Sicht</h2>
+      <p class="small muted" style="margin-top:0">
+        Beantworte die folgenden Fragen aus deiner eigenen Sicht.
+      </p>
+      {
+        fragen.map((f) => (
+          <div class="field">
+            <label>{f.frage}</label>
+            <p class="small muted" style="margin:.2rem 0 .5rem">{f.hilfe}</p>
+            <textarea data-frage={f.frage} rows="4" />
+          </div>
+        ))
+      }
+
+      <h2>🎯 Persönliche Ziele</h2>
+      {
+        ziele.map((z) => (
+          <div class="field">
+            <label>{z.ziel}</label>
+            <p class="small muted" style="margin:.2rem 0 .5rem">{z.hilfe}</p>
+            <textarea data-ziel={z.ziel} rows="4" />
+          </div>
+        ))
+      }
+
+      <h2>🏠 Wie und wo ich jetzt lebe</h2>
+      <div class="field">
+        <label for="wie-lebe">Wie ist es aktuell? Wo und wie lebst du momentan?</label>
+        <textarea id="wie-lebe" rows="4" />
+      </div>
+
+      <button type="submit" class="btn">Datei erstellen</button>
+    </form>
+
+    <div id="bei-output-wrap" hidden>
+      <h2>Fertig</h2>
+      <p class="small muted">
+        Deine Antworten sind bereit. Lade die Datei herunter und bring sie zu deinem Termin mit
+        oder leite sie an deine Betreuung weiter.
+      </p>
+      <button type="button" id="downloadBtn" class="btn btn-secondary">
+        💾 Datei herunterladen
+      </button>
+    </div>
+
+    <p><a href="/vorlagen/">← Zurück zur BEI-Generierung</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .grid3 {
+    display: grid;
+    grid-template-columns: 3fr 1fr 2fr;
+    gap: 1rem;
+  }
+  @media (max-width: 600px) {
+    .grid2,
+    .grid3 {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('bei-form') as HTMLFormElement;
+  const outWrap = document.getElementById('bei-output-wrap') as HTMLDivElement;
+  const val = (id: string) => (document.getElementById(id) as HTMLInputElement | HTMLSelectElement)?.value ?? '';
+
+  const staatsangehoerigkeitSelect = document.getElementById('staatsangehoerigkeit') as HTMLSelectElement;
+  const staatsangehoerigkeitAndereWrap = document.getElementById(
+    'staatsangehoerigkeit-andere-wrap'
+  ) as HTMLDivElement;
+  staatsangehoerigkeitSelect.addEventListener('change', () => {
+    staatsangehoerigkeitAndereWrap.hidden = staatsangehoerigkeitSelect.value !== 'andere (bitte angeben)';
+  });
+
+  const fmtDate = (v: string) => {
+    if (!v) return '';
+    const [y, m, d] = v.split('-');
+    return `${d}.${m}.${y}`;
+  };
+
+  let letzteDatei: { name: string; json: string } | null = null;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const staatsangehoerigkeit =
+      staatsangehoerigkeitSelect.value === 'andere (bitte angeben)'
+        ? val('staatsangehoerigkeit-andere')
+        : staatsangehoerigkeitSelect.value;
+
+    const personal_information = {
+      Anrede: val('anrede'),
+      Nachname: val('nachname'),
+      Vorname: val('vorname'),
+      Geburtsdatum: fmtDate(val('geburtsdatum')),
+      Straße: val('strasse'),
+      Hausnummer: val('hausnummer'),
+      Postleitzahl: val('plz'),
+      Wohnort: val('wohnort'),
+      Familienstand: val('familienstand'),
+      Staatsangehörigkeit: staatsangehoerigkeit,
+      Behinderung: val('behinderung'),
+      Planungszeitraum_ab: fmtDate(val('planungszeitraum-ab')),
+      Planungszeitraum_bis: fmtDate(val('planungszeitraum-bis')),
+    };
+
+    const personal_view: Record<string, string> = {};
+    const mitarbeitersicht: Record<string, unknown> = {};
+
+    form.querySelectorAll<HTMLTextAreaElement>('textarea[data-frage]').forEach((el) => {
+      const frage = el.dataset.frage as string;
+      personal_view[frage] = el.value;
+      mitarbeitersicht[frage] = '';
+    });
+
+    const zielWerte: Record<string, string> = {};
+    form.querySelectorAll<HTMLTextAreaElement>('textarea[data-ziel]').forEach((el) => {
+      const ziel = el.dataset.ziel as string;
+      personal_view[ziel] = el.value;
+      zielWerte[ziel] = el.value;
+      mitarbeitersicht[ziel] = '';
+    });
+
+    const wieLebe = val('wie-lebe');
+    personal_view['Wie und wo ich jetzt lebe'] = wieLebe;
+    mitarbeitersicht['Wie und wo ich jetzt lebe'] = '';
+    mitarbeitersicht['Ergänzende Sicht zur persönlichen Situation'] = '';
+    mitarbeitersicht['zielideen'] = [];
+
+    const final_data = {
+      personal_information,
+      personal_view,
+      personal_goals: zielWerte,
+      prof_view: {
+        'Wie und wo ich jetzt lebe': '',
+        'Ergänzende Sicht': '',
+      },
+      mitarbeitersicht,
+      tagesstruktur: null,
+    };
+
+    const nachname = personal_information.Nachname || 'daten';
+    const vorname = personal_information.Vorname || '';
+    letzteDatei = {
+      name: vorname ? `${nachname}_${vorname}.json` : `${nachname}.json`,
+      json: JSON.stringify(final_data, null, 2),
+    };
+
+    outWrap.hidden = false;
+    outWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('downloadBtn')?.addEventListener('click', () => {
+    if (!letzteDatei) return;
+    const blob = new Blob([letzteDatei.json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = letzteDatei.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+</script>

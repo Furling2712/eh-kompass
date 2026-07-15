@@ -77,6 +77,20 @@ const selbstfuersorge = defineCollection({
   }),
 });
 
+// Öffentliche Skill-Zone für Klient:innen (nicht der Mitarbeiter-Bereich!). Freie Einträge
+// werden direkt gezeigt, premium:true-Einträge erscheinen als gesperrte Vorschau-Karte.
+const skillzone = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/skillzone' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    order: z.number().default(99),
+    premium: z.boolean().default(false),
+    audioUrl: z.string().url().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
 export const collections = {
   ratgeber,
   glossar,
@@ -84,4 +98,5 @@ export const collections = {
   videos,
   erfahrungsschatz,
   selbstfuersorge,
+  skillzone,
 };

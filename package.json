@@ -15,6 +15,9 @@
     "@astrojs/mdx": "^4.2.0",
     "@astrojs/netlify": "^6.6.5",
     "@astrojs/sitemap": "^3.2.1",
-    "astro": "^5.2.0"
+    "astro": "^5.2.0",
+    "docx": "^9.7.1",
+    "jspdf": "^4.2.1",
+    "jszip": "^3.10.1"
   }
 }

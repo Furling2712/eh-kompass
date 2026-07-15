@@ -1,0 +1,164 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CrisisNotice from '../../components/CrisisNotice.astro';
+---
+
+<BaseLayout
+  title="Blasen zerplatzen – Ablenkungsspiel"
+  description="Kostenloses, ruhiges Ablenkungsspiel: Blasen zerplatzen, um in Anspannung den Kopf kurz freizubekommen. Kein Punktedruck, kein Verlieren."
+>
+  <div class="container prose article">
+    <span class="badge">Skill-Zone · Ablenkung · kostenlos</span>
+    <h1>Blasen zerplatzen</h1>
+    <p class="lead muted">
+      Ein ruhiges Ablenkungsspiel für den Moment, in dem dein Kopf kurz etwas anderes braucht.
+      Es gibt kein Verlieren und keine Zeitvorgabe – mach einfach, solange es guttut.
+    </p>
+
+    <CrisisNotice />
+
+    <div class="bubble-wrap">
+      <div class="bubble-area" id="bubble-area">
+        <p class="bubble-hint" id="bubble-hint">Klick auf „Spiel starten“, wenn du bereit bist.</p>
+      </div>
+      <div class="bubble-controls">
+        <button type="button" id="bubble-start" class="btn">Spiel starten</button>
+        <button type="button" id="bubble-stop" class="btn btn-secondary" hidden>Beenden</button>
+        <span id="bubble-counter" class="small muted" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <p><a href="/skillzone/">← Zurück zur Skill-Zone</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .bubble-wrap {
+    margin: 1.5rem 0;
+  }
+  .bubble-area {
+    position: relative;
+    height: 26rem;
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, var(--color-accent), var(--color-surface));
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .bubble-hint {
+    color: var(--color-muted);
+    text-align: center;
+    padding: 0 1rem;
+  }
+  /* :global, weil diese Elemente erst im Browser per JS erzeugt werden und Astros
+     automatisches Scoping-Attribut dadurch nie auf ihnen landet. */
+  :global(.bubble) {
+    position: absolute;
+    bottom: -4rem;
+    border-radius: 50%;
+    cursor: pointer;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.9),
+      rgba(31, 111, 107, 0.55) 55%,
+      rgba(21, 84, 80, 0.65) 100%
+    );
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.5);
+    animation-name: bubble-float;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  :global(.bubble.popped) {
+    animation: none !important;
+    transform: scale(1.5);
+    opacity: 0;
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+  }
+  @keyframes bubble-float {
+    from {
+      transform: translateY(0);
+      opacity: 0.95;
+    }
+    to {
+      transform: translateY(-32rem);
+      opacity: 0.15;
+    }
+  }
+  .bubble-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  /* .btn setzt display:inline-block, das sonst das hidden-Attribut überschreiben würde. */
+  .btn[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const area = document.getElementById('bubble-area') as HTMLDivElement;
+  const hint = document.getElementById('bubble-hint') as HTMLParagraphElement;
+  const startBtn = document.getElementById('bubble-start') as HTMLButtonElement;
+  const stopBtn = document.getElementById('bubble-stop') as HTMLButtonElement;
+  const counterEl = document.getElementById('bubble-counter') as HTMLSpanElement;
+
+  let running = false;
+  let spawnTimer: ReturnType<typeof setInterval> | null = null;
+  let popped = 0;
+
+  function updateCounter() {
+    counterEl.textContent =
+      popped > 0 ? `${popped} Blase${popped === 1 ? '' : 'n'} zerplatzt – schön ruhig weiter.` : '';
+  }
+
+  function pop(bubble: HTMLDivElement) {
+    if (bubble.classList.contains('popped')) return;
+    bubble.classList.add('popped');
+    popped += 1;
+    updateCounter();
+    setTimeout(() => bubble.remove(), 300);
+  }
+
+  function spawnBubble() {
+    if (!running) return;
+    const size = 40 + Math.random() * 40;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    const maxLeft = Math.max(area.clientWidth - size, 0);
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.left = `${Math.random() * maxLeft}px`;
+    const duration = 6 + Math.random() * 5;
+    bubble.style.animationDuration = `${duration}s`;
+    bubble.addEventListener('click', () => pop(bubble));
+    bubble.addEventListener('animationend', () => bubble.remove());
+    area.appendChild(bubble);
+  }
+
+  startBtn.addEventListener('click', () => {
+    running = true;
+    popped = 0;
+    updateCounter();
+    hint.hidden = true;
+    startBtn.hidden = true;
+    stopBtn.hidden = false;
+    spawnBubble();
+    spawnTimer = setInterval(spawnBubble, 900);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    running = false;
+    if (spawnTimer) clearInterval(spawnTimer);
+    area.querySelectorAll('.bubble').forEach((b) => b.remove());
+    hint.hidden = false;
+    startBtn.hidden = false;
+    stopBtn.hidden = true;
+  });
+</script>

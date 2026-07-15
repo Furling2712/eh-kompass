@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CrisisNotice from '../../components/CrisisNotice.astro';
+---
+
+<BaseLayout
+  title="Box-Atmung"
+  description="Kostenlose Atemübung zur Selbstregulation in akuter Anspannung: die Box-Atmung mit animiertem Kreis zum Mitatmen."
+>
+  <div class="container prose article">
+    <span class="badge">Skill-Zone · Atmung · kostenlos</span>
+    <h1>Box-Atmung</h1>
+    <p class="lead muted">
+      Vier gleich lange Schritte: einatmen, halten, ausatmen, halten – je 4 Sekunden. Der Kreis
+      zeigt dir den Rhythmus, du musst dir nichts merken.
+    </p>
+
+    <CrisisNotice />
+
+    <div class="breath-box">
+      <div class="breath-circle" id="breath-circle">
+        <span id="breath-label">Bereit?</span>
+        <span id="breath-count" class="breath-count"></span>
+      </div>
+      <div class="breath-actions">
+        <button type="button" id="breath-start" class="btn">Übung starten</button>
+        <button type="button" id="breath-stop" class="btn btn-secondary" hidden>Beenden</button>
+      </div>
+    </div>
+
+    <h2>Wann hilft das?</h2>
+    <p>
+      Box-Atmung kann helfen, wenn Anspannung, Ärger oder Panik gerade sehr hoch sind. Sie
+      verlangsamt die Atmung bewusst und lenkt die Aufmerksamkeit auf etwas Konkretes. Ein paar
+      Runden reichen oft schon aus – es gibt kein „richtig lang genug“.
+    </p>
+
+    <p><a href="/skillzone/">← Zurück zur Skill-Zone</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .breath-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--color-accent);
+    border-radius: var(--radius);
+    padding: 3rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .breath-circle {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    transform: scale(1);
+    transition: transform 4s ease-in-out;
+    padding: 1rem;
+  }
+  .breath-circle span {
+    font-weight: 600;
+  }
+  .breath-count {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+  }
+  .breath-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  /* .btn setzt display:inline-block, das sonst das hidden-Attribut überschreiben würde. */
+  .btn[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const phases = [
+    { label: 'Einatmen …', seconds: 4, scale: 1.4 },
+    { label: 'Halten …', seconds: 4, scale: 1.4 },
+    { label: 'Ausatmen …', seconds: 4, scale: 1 },
+    { label: 'Halten …', seconds: 4, scale: 1 },
+  ];
+
+  const circle = document.getElementById('breath-circle') as HTMLDivElement;
+  const label = document.getElementById('breath-label') as HTMLSpanElement;
+  const count = document.getElementById('breath-count') as HTMLSpanElement;
+  const startBtn = document.getElementById('breath-start') as HTMLButtonElement;
+  const stopBtn = document.getElementById('breath-stop') as HTMLButtonElement;
+
+  let running = false;
+  let phaseIndex = 0;
+  let secondsLeft = 0;
+  let ticker: ReturnType<typeof setInterval> | null = null;
+
+  function applyPhase() {
+    const phase = phases[phaseIndex];
+    label.textContent = phase.label;
+    circle.style.transition = `transform ${phase.seconds}s ease-in-out`;
+    circle.style.transform = `scale(${phase.scale})`;
+    secondsLeft = phase.seconds;
+    count.textContent = String(secondsLeft);
+  }
+
+  function tick() {
+    if (!running) return;
+    secondsLeft -= 1;
+    if (secondsLeft <= 0) {
+      phaseIndex = (phaseIndex + 1) % phases.length;
+      applyPhase();
+    } else {
+      count.textContent = String(secondsLeft);
+    }
+  }
+
+  startBtn.addEventListener('click', () => {
+    running = true;
+    phaseIndex = 0;
+    applyPhase();
+    if (ticker) clearInterval(ticker);
+    ticker = setInterval(tick, 1000);
+    startBtn.hidden = true;
+    stopBtn.hidden = false;
+  });
+
+  stopBtn.addEventListener('click', () => {
+    running = false;
+    if (ticker) clearInterval(ticker);
+    circle.style.transition = 'transform 0.6s ease-in-out';
+    circle.style.transform = 'scale(1)';
+    label.textContent = 'Bereit?';
+    count.textContent = '';
+    startBtn.hidden = false;
+    stopBtn.hidden = true;
+  });
+</script>
