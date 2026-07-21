@@ -6,6 +6,27 @@
 
 export const BESTELL_EMAIL = 'alexander.radler@ptv-euregio.de'; // TODO: echte Adresse eintragen
 
+export interface ShopKategorie {
+  slug: string;
+  label: string;
+  beschreibung: string;
+}
+
+export const kategorien: ShopKategorie[] = [
+  {
+    slug: 'therapie-paedagogik',
+    label: 'Therapie & Pädagogik',
+    beschreibung:
+      'Handgefertigte Materialien für therapeutische und pädagogische Arbeit, z. B. Aufstellungsarbeit, Supervision und Coaching.',
+  },
+  {
+    slug: 'skills',
+    label: 'Skills',
+    beschreibung:
+      'Kleine Hilfsmittel für den Krisenkoffer und den Alltag – Skills zum Anfassen gegen Anspannung und Dissoziation.',
+  },
+];
+
 export interface ShopProdukt {
   id: string;
   name: string;
@@ -14,6 +35,7 @@ export interface ShopProdukt {
   preis: number;
   bild: string;
   kategorie: string;
+  kategorieSlug: string;
   lieferzeit: string;
   anbieter: string;
 }
@@ -35,6 +57,7 @@ export const produkte: ShopProdukt[] = [
     preis: 139.99,
     bild: '/images/shop/aufstellungsbrett.png',
     kategorie: 'Therapie & Pädagogik',
+    kategorieSlug: 'therapie-paedagogik',
     lieferzeit: '5–10 Werktage',
     anbieter: 'PTV-Euregio e.V.',
   },
@@ -51,6 +74,7 @@ export const produkte: ShopProdukt[] = [
     preis: 6.9,
     bild: '/images/shop/Skillball.png',
     kategorie: 'Skills',
+    kategorieSlug: 'skills',
     lieferzeit: '3–5 Werktage',
     anbieter: 'PTV-Euregio e.V.',
   },
@@ -63,6 +87,7 @@ export const produkte: ShopProdukt[] = [
     preis: 8.5,
     bild: '/images/shop/Riechst%C3%A4bchen.png',
     kategorie: 'Skills',
+    kategorieSlug: 'skills',
     lieferzeit: '3–5 Werktage',
     anbieter: 'PTV-Euregio e.V.',
   },
@@ -79,6 +104,7 @@ export const produkte: ShopProdukt[] = [
     preis: 5.9,
     bild: '/images/shop/Himbeer%20Chilli%20Skillbonbons.png',
     kategorie: 'Skills',
+    kategorieSlug: 'skills',
     lieferzeit: '3–5 Werktage',
     anbieter: 'PTV-Euregio e.V.',
   },

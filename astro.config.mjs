@@ -15,6 +15,8 @@ export default defineConfig({
     schema: {
       STAFF_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret' }),
       STAFF_SESSION_SECRET: envField.string({ context: 'server', access: 'secret' }),
+      CLIENT_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret' }),
+      CLIENT_SESSION_SECRET: envField.string({ context: 'server', access: 'secret' }),
     },
   },
   markdown: {

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { produkte } from '../../data/shop-produkte';
+import { kategorien, produkte } from '../../data/shop-produkte';
 ---
 
 <BaseLayout
@@ -14,24 +14,21 @@ import { produkte } from '../../data/shop-produkte';
       Systemiker, mit Sorgfalt in eigener Werkstatt hergestellt.
     </p>
 
-    <ul class="card-grid">
+    <ul class="card-grid kategorie-grid">
       {
-        produkte.map((p) => (
-          <li class="card">
-            <a href={`/shop/${p.id}/`} class="card-link">
-              <img src={p.bild} alt={p.name} class="produkt-bild" />
-              <h3>{p.name}</h3>
-            </a>
-            <p class="small muted" style="margin:-0.5rem 0 0">
-              {p.kategorie}
-            </p>
-            <p>{p.beschreibung}</p>
-            <p class="preis">{p.preis.toFixed(2)} €</p>
-            <a href={`/shop/${p.id}/`} class="btn">
-              Ansehen
-            </a>
-          </li>
-        ))
+        kategorien.map((k) => {
+          const anzahl = produkte.filter((p) => p.kategorieSlug === k.slug).length;
+          return (
+            <li class="card kategorie-card">
+              <a href={`/shop/${k.slug}/`} class="card-link">
+                <span class="badge">{anzahl} {anzahl === 1 ? 'Produkt' : 'Produkte'}</span>
+                <h2>{k.label}</h2>
+                <p>{k.beschreibung}</p>
+                <span class="btn">Ordner öffnen →</span>
+              </a>
+            </li>
+          );
+        })
       }
     </ul>
 
@@ -43,22 +40,19 @@ import { produkte } from '../../data/shop-produkte';
   .article {
     padding-block: 2.5rem 1rem;
   }
-  .card-link {
+  .kategorie-grid {
+    margin-top: 2rem;
+  }
+  .kategorie-card .card-link {
+    display: block;
     text-decoration: none;
     color: inherit;
   }
-  .produkt-bild {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: var(--radius);
-    margin-bottom: 0.75rem;
-    background: var(--color-surface);
+  .kategorie-card h2 {
+    margin: 0.5rem 0 0.5rem;
   }
-  .preis {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--color-primary-dark);
-    margin: 0.25rem 0 1rem;
+  .kategorie-card .btn {
+    margin-top: 0.75rem;
+    display: inline-block;
   }
 </style>

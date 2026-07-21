@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Online-BeWo – Video-Sprechstunde"
+  description="Betreutes Wohnen auch per Video: geschützte Video-Sprechstunde direkt über diese Website, ohne zusätzliche App."
+>
+  <div class="container prose article">
+    <span class="badge">Neu</span>
+    <h1>Online-BeWo – die Video-Sprechstunde</h1>
+    <p class="lead muted">
+      Für Termine, bei denen ein persönlicher Besuch gerade nicht möglich oder nötig ist, biete ich
+      Betreutes Wohnen auch per Video an – direkt über diese Website, ohne zusätzliche App und ohne
+      Registrierung mit E-Mail-Adresse.
+    </p>
+
+    <h2>Wie funktioniert das?</h2>
+    <ol>
+      <li>Du bekommst von mir persönlich einen Zugangscode und einen Termin mit Uhrzeit.</li>
+      <li>
+        Zur vereinbarten Zeit rufst du <a href="/online-bewo/login">/online-bewo</a> auf, gibst den
+        Zugangscode ein und gelangst in die geschützte Sprechstunde.
+      </li>
+      <li>Dort geben wir beide denselben Sitzungsnamen ein, den ich dir vorher genannt habe.</li>
+      <li>Kamera- und Mikrofonzugriff im Browser erlauben – schon sind wir verbunden.</li>
+    </ol>
+
+    <div class="notice">
+      <strong>🔒 Datenschutz: Video verlässt nie einen Zwischenserver</strong>
+      <p style="margin-bottom:0">
+        Die Verbindung läuft direkt und verschlüsselt von deinem Gerät zu meinem (Peer-to-Peer,
+        WebRTC) – Bild und Ton laufen bei einer erfolgreichen Verbindung zu keinem Zeitpunkt über
+        einen Server, auch nicht über den dieser Website. Lediglich der technische
+        Verbindungsaufbau (keine Bild-/Toninhalte) läuft kurz über die Website, damit sich beide
+        Geräte finden.
+      </p>
+    </div>
+
+    <h2>Wichtig zu wissen</h2>
+    <ul>
+      <li>Kein Ersatz für Termine, bei denen ein persönlicher Besuch erforderlich ist.</li>
+      <li>Funktioniert am besten mit aktuellem Chrome, Firefox oder Safari und stabilem WLAN.</li>
+      <li>
+        In seltenen Fällen (z. B. sehr restriktive Firmen- oder Schulnetzwerke) kann die
+        Direktverbindung technisch nicht zustande kommen – dann weichen wir auf einen Telefonanruf
+        aus.
+      </li>
+    </ul>
+
+    <p><a href="/online-bewo/login" class="btn">Zur Video-Sprechstunde →</a></p>
+
+    <h2>Noch keinen Zugangscode?</h2>
+    <p>
+      Melde dich über die im <a href="/impressum">Impressum</a> genannte Adresse oder bei unserem
+      nächsten Termin, dann vereinbaren wir das Nötige.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

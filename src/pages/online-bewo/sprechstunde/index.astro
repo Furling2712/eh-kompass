@@ -1,0 +1,307 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Online-BeWo – Sprechstunde" noindex>
+  <div class="container prose article">
+    <h1>Video-Sprechstunde</h1>
+    <p class="lead muted">
+      Gebt beide denselben Sitzungsnamen ein (den ich dir vorher genannt habe) und wählt jeweils
+      eure Rolle.
+    </p>
+
+    <div id="setup" class="setup">
+      <label for="raum">Sitzungsname</label>
+      <input type="text" id="raum" autocomplete="off" placeholder="z. B. montag-15uhr" />
+
+      <div class="role-buttons">
+        <button id="start-host" class="btn">Ich bin Berater:in – Sitzung starten</button>
+        <button id="start-gast" class="btn btn-secondary">Ich bin Klient:in – beitreten</button>
+      </div>
+      <p id="setup-error" class="error"></p>
+    </div>
+
+    <div id="call" class="call hidden">
+      <p id="status" class="small muted">Verbinde …</p>
+      <div class="video-grid">
+        <video id="local-video" autoplay playsinline muted></video>
+        <video id="remote-video" autoplay playsinline></video>
+      </div>
+      <div class="controls">
+        <button id="toggle-mic" class="btn btn-secondary">Mikrofon aus</button>
+        <button id="toggle-cam" class="btn btn-secondary">Kamera aus</button>
+        <button id="hangup" class="btn btn-danger">Auflegen</button>
+      </div>
+    </div>
+
+    <form method="POST" action="/online-bewo/logout" class="logout-form">
+      <button type="submit" class="btn btn-secondary">Abmelden</button>
+    </form>
+  </div>
+</BaseLayout>
+
+<script>
+  const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+  const POLL_INTERVAL_MS = 1500;
+
+  const setupEl = document.getElementById('setup') as HTMLDivElement;
+  const callEl = document.getElementById('call') as HTMLDivElement;
+  const raumInput = document.getElementById('raum') as HTMLInputElement;
+  const setupError = document.getElementById('setup-error') as HTMLParagraphElement;
+  const statusEl = document.getElementById('status') as HTMLParagraphElement;
+  const localVideo = document.getElementById('local-video') as HTMLVideoElement;
+  const remoteVideo = document.getElementById('remote-video') as HTMLVideoElement;
+  const startHostBtn = document.getElementById('start-host') as HTMLButtonElement;
+  const startGastBtn = document.getElementById('start-gast') as HTMLButtonElement;
+  const toggleMicBtn = document.getElementById('toggle-mic') as HTMLButtonElement;
+  const toggleCamBtn = document.getElementById('toggle-cam') as HTMLButtonElement;
+  const hangupBtn = document.getElementById('hangup') as HTMLButtonElement;
+
+  let pc: RTCPeerConnection | null = null;
+  let localStream: MediaStream | null = null;
+  let pollTimer: ReturnType<typeof setInterval> | null = null;
+  let raum = '';
+  let role: 'host' | 'gast' = 'host';
+  let appliedAnswer = false;
+  let appliedOffer = false;
+  let appliedHostCandidates = 0;
+  let appliedGastCandidates = 0;
+
+  function setStatus(text: string) {
+    statusEl.textContent = text;
+  }
+
+  async function signalGet(code: string) {
+    const res = await fetch(`/online-bewo/api/signal?raum=${encodeURIComponent(code)}`);
+    if (!res.ok) throw new Error('signal_get_failed');
+    return res.json();
+  }
+
+  async function signalPost(body: Record<string, unknown>) {
+    const res = await fetch('/online-bewo/api/signal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error('signal_post_failed');
+  }
+
+  async function startCall(chosenRole: 'host' | 'gast') {
+    const code = raumInput.value.trim().toLowerCase();
+    if (!/^[a-z0-9-]{1,64}$/.test(code)) {
+      setupError.textContent = 'Bitte einen Sitzungsnamen ohne Sonderzeichen/Leerzeichen eingeben.';
+      return;
+    }
+    setupError.textContent = '';
+    raum = code;
+    role = chosenRole;
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setupError.textContent =
+        'Dieser Browser erlaubt hier keinen Kamera/Mikrofon-Zugriff. Meist liegt es daran, dass die Seite nicht über HTTPS (oder localhost) aufgerufen wird.';
+      return;
+    }
+
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    } catch (err) {
+      const name = err instanceof Error ? err.name : '';
+      const messages: Record<string, string> = {
+        NotAllowedError: 'Zugriff auf Kamera/Mikrofon wurde blockiert. Bitte in den Browser-Einstellungen (Symbol links neben der Adresse) für diese Seite erlauben und neu laden.',
+        NotFoundError: 'Es wurde keine Kamera/kein Mikrofon gefunden. Ist ein Gerät angeschlossen und in den Systemeinstellungen aktiviert?',
+        NotReadableError: 'Kamera oder Mikrofon werden bereits von einem anderen Programm (z. B. Teams, Zoom, einem anderen Browser-Tab) verwendet. Bitte dort schließen und neu laden.',
+        OverconstrainedError: 'Die angeforderten Kamera/Mikrofon-Einstellungen werden vom Gerät nicht unterstützt.',
+        SecurityError: 'Der Browser blockiert den Zugriff aus Sicherheitsgründen (z. B. weil die Seite nicht über HTTPS läuft).',
+      };
+      setupError.textContent =
+        messages[name] ?? `Kamera/Mikrofon-Zugriff fehlgeschlagen (${name || 'unbekannter Fehler'}).`;
+      return;
+    }
+
+    setupEl.classList.add('hidden');
+    callEl.classList.remove('hidden');
+    localVideo.srcObject = localStream;
+
+    pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    localStream.getTracks().forEach((track) => pc!.addTrack(track, localStream!));
+
+    pc.ontrack = (event) => {
+      remoteVideo.srcObject = event.streams[0];
+      setStatus('Verbunden.');
+    };
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        signalPost({ raum, role, action: 'ice', data: event.candidate.toJSON() }).catch(() => {});
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (pc?.connectionState === 'connecting') setStatus('Verbinde …');
+      if (pc?.connectionState === 'disconnected' || pc?.connectionState === 'failed') {
+        setStatus('Verbindung unterbrochen.');
+      }
+    };
+
+    if (role === 'host') {
+      setStatus('Warte auf Klient:in …');
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      await signalPost({ raum, role, action: 'offer', data: offer });
+    } else {
+      setStatus('Warte auf Berater:in …');
+    }
+
+    pollTimer = setInterval(pollSignal, POLL_INTERVAL_MS);
+    pollSignal();
+  }
+
+  async function pollSignal() {
+    if (!pc) return;
+    try {
+      const state = await signalGet(raum);
+
+      if (role === 'gast' && state.offer && !appliedOffer) {
+        appliedOffer = true;
+        await pc.setRemoteDescription(new RTCSessionDescription(state.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await signalPost({ raum, role, action: 'answer', data: answer });
+      }
+
+      if (role === 'host' && state.answer && !appliedAnswer) {
+        appliedAnswer = true;
+        await pc.setRemoteDescription(new RTCSessionDescription(state.answer));
+      }
+
+      const incomingCandidates: unknown[] =
+        role === 'host' ? (state.gastCandidates ?? []) : (state.hostCandidates ?? []);
+      const alreadyApplied = role === 'host' ? appliedGastCandidates : appliedHostCandidates;
+
+      for (let i = alreadyApplied; i < incomingCandidates.length; i += 1) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(incomingCandidates[i] as RTCIceCandidateInit));
+        } catch {
+          // einzelner Kandidat unbrauchbar - ignorieren, andere weiter anwenden
+        }
+      }
+      if (role === 'host') appliedGastCandidates = incomingCandidates.length;
+      else appliedHostCandidates = incomingCandidates.length;
+    } catch {
+      // vorübergehender Netzwerkfehler beim Polling - nächster Versuch folgt automatisch
+    }
+  }
+
+  async function hangup() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = null;
+
+    pc?.close();
+    pc = null;
+    localStream?.getTracks().forEach((track) => track.stop());
+    localStream = null;
+
+    if (raum) {
+      fetch(`/online-bewo/api/signal?raum=${encodeURIComponent(raum)}`, { method: 'DELETE' }).catch(
+        () => {}
+      );
+    }
+
+    callEl.classList.add('hidden');
+    setupEl.classList.remove('hidden');
+    appliedAnswer = false;
+    appliedOffer = false;
+    appliedHostCandidates = 0;
+    appliedGastCandidates = 0;
+  }
+
+  startHostBtn.addEventListener('click', () => startCall('host'));
+  startGastBtn.addEventListener('click', () => startCall('gast'));
+  hangupBtn.addEventListener('click', hangup);
+
+  toggleMicBtn.addEventListener('click', () => {
+    if (!localStream) return;
+    const track = localStream.getAudioTracks()[0];
+    if (!track) return;
+    track.enabled = !track.enabled;
+    toggleMicBtn.textContent = track.enabled ? 'Mikrofon aus' : 'Mikrofon an';
+  });
+
+  toggleCamBtn.addEventListener('click', () => {
+    if (!localStream) return;
+    const track = localStream.getVideoTracks()[0];
+    if (!track) return;
+    track.enabled = !track.enabled;
+    toggleCamBtn.textContent = track.enabled ? 'Kamera aus' : 'Kamera an';
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (raum) {
+      navigator.sendBeacon(`/online-bewo/api/signal?raum=${encodeURIComponent(raum)}`);
+    }
+  });
+</script>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .setup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 28rem;
+    margin-top: 1.5rem;
+  }
+  .setup input {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+  .role-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .error {
+    color: #b3261e;
+    margin: 0;
+  }
+  .hidden {
+    display: none;
+  }
+  .video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .video-grid video {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #000;
+    border-radius: var(--radius);
+    object-fit: cover;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .btn-danger {
+    background: #b3261e;
+    color: #fff;
+  }
+  .logout-form {
+    margin-top: 2rem;
+  }
+  @media (max-width: 40rem) {
+    .video-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

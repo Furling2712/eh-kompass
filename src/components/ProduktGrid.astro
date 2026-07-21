@@ -1,0 +1,51 @@
+---
+import type { ShopProdukt } from '../data/shop-produkte';
+
+interface Props {
+  produkte: ShopProdukt[];
+}
+
+const { produkte } = Astro.props;
+---
+
+<ul class="card-grid">
+  {
+    produkte.map((p) => (
+      <li class="card">
+        <a href={`/shop/${p.id}/`} class="card-link">
+          <img src={p.bild} alt={p.name} class="produkt-bild" />
+          <h3>{p.name}</h3>
+        </a>
+        <p class="small muted" style="margin:-0.5rem 0 0">
+          {p.kategorie}
+        </p>
+        <p>{p.beschreibung}</p>
+        <p class="preis">{p.preis.toFixed(2)} €</p>
+        <a href={`/shop/${p.id}/`} class="btn">
+          Ansehen
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .produkt-bild {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    background: var(--color-surface);
+  }
+  .preis {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0.25rem 0 1rem;
+  }
+</style>

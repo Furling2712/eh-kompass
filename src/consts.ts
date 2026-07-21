@@ -12,6 +12,7 @@ export const NAV_LINKS = [
   { href: '/skillzone/', label: 'Skill-Zone' },
   { href: '/vorlagen/', label: 'Vorlagen' },
   { href: '/shop/', label: 'Shop' },
+  { href: '/online-bewo/', label: 'Online-BeWo' },
   { href: '/ueber-mich', label: 'Über mich' },
 ];
 

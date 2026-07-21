@@ -17,7 +17,9 @@ const { produkt } = Astro.props;
       <img src={produkt.bild} alt={produkt.name} class="produkt-bild" />
 
       <div>
-        <p class="small muted" style="margin:0">{produkt.kategorie}</p>
+        <p class="small muted" style="margin:0">
+          <a href={`/shop/${produkt.kategorieSlug}/`}>{produkt.kategorie}</a>
+        </p>
         <h1 style="margin-top:0.25rem">{produkt.name}</h1>
         <p>{produkt.beschreibung}</p>
 

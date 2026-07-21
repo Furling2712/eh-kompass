@@ -1,0 +1,73 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  CLIENT_COOKIE_NAME,
+  SESSION_TTL_SECONDS,
+  createClientSessionCookieValue,
+  verifyClientPassword,
+} from '../../lib/auth';
+
+const next = Astro.url.searchParams.get('next') ?? '/online-bewo/sprechstunde/';
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const code = String(form.get('code') ?? '');
+
+  if (verifyClientPassword(code)) {
+    Astro.cookies.set(CLIENT_COOKIE_NAME, createClientSessionCookieValue(), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: import.meta.env.PROD,
+      path: '/',
+      maxAge: SESSION_TTL_SECONDS,
+    });
+    return Astro.redirect(next);
+  }
+
+  error = 'Falscher Zugangscode.';
+}
+---
+
+<BaseLayout title="Online-BeWo – Zugang" noindex>
+  <div class="container prose article">
+    <h1>Zugang zur Video-Sprechstunde</h1>
+    <p class="lead muted">Gib den Zugangscode ein, den du persönlich erhalten hast.</p>
+
+    <form method="POST" class="login-form">
+      <label for="code">Zugangscode</label>
+      <input type="password" id="code" name="code" required autofocus autocomplete="off" />
+      <button type="submit" class="btn">Anmelden</button>
+      {error && <p class="error">{error}</p>}
+    </form>
+
+    <p class="small muted">
+      Keinen Zugangscode? Siehe <a href="/online-bewo/">Infos zur Online-BeWo</a>.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+    max-width: 24rem;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .login-form input {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+  .error {
+    color: #b3261e;
+    margin: 0;
+  }
+</style>
