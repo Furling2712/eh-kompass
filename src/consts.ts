@@ -10,7 +10,7 @@ export const NAV_LINKS = [
   { href: '/glossar/', label: 'Glossar' },
   { href: '/tools/', label: 'Tools' },
   { href: '/skillzone/', label: 'Skill-Zone' },
-  { href: '/vorlagen/', label: 'Vorlagen' },
+  { href: '/bei-generierung/', label: 'BEI-Generierung' },
   { href: '/shop/', label: 'Shop' },
   { href: '/online-bewo/', label: 'Online-BeWo' },
   { href: '/ueber-mich', label: 'Über mich' },

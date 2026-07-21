@@ -52,7 +52,7 @@ Diese Punkte sind bewusst als Platzhalter angelegt und müssen von dir ausgefül
 3. **`src/pages/datenschutz.astro`** – an tatsächlich genutzte Dienste (Hosting, Analytics,
    AdSense, Zahlungsanbieter) anpassen.
 4. **`src/pages/ueber-mich.astro`** – echte Qualifikation/Werdegang (wichtig für E-E-A-T & SEO).
-5. **`src/pages/vorlagen/index.astro`** – `CHECKOUT_URL` mit Gumroad-/Lemonsqueezy-Link füllen.
+5. **`src/pages/bei-generierung/index.astro`** – `CHECKOUT_URL` mit Gumroad-/Lemonsqueezy-Link füllen.
 6. **`public/og-default.png`** – Social-Sharing-Vorschaubild (1200×630 px) hinterlegen.
 7. **`public/robots.txt`** – Sitemap-Domain anpassen, falls abweichend.
 8. **Fachliche Prüfung** aller rechtlichen/inhaltlichen Aussagen (siehe SPEC Abschnitt 4 & 9).

@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Checkout-Link vor Launch durch echten Gumroad-/Lemonsqueezy-Link ersetzen.
+// Nach erfolgreichem Kauf beim Zahlungsdienstleister als Redirect-/Bestätigungs-URL
+// /bei-generierung/bei-formular/ hinterlegen (dort liegt das eigentliche Formular).
+const CHECKOUT_URL = '#';
+
+// Lizenzpakete für Träger/Teams (Sammelbestellung mehrerer Zugänge). Checkout-Links
+// vor Launch ebenfalls durch echte Gumroad-/Lemonsqueezy-Links ersetzen.
+const LIZENZ_10_CHECKOUT_URL = '#';
+const LIZENZ_100_CHECKOUT_URL = '#';
+
+const lizenzPakete = [
+  { anzahl: 10, preis: 500 },
+  { anzahl: 100, preis: 4500 },
+];
+
+const inhalte = [
+  'Digitales BEI-Formular: alle Fragen aus der Bedarfsermittlung in Ruhe online beantworten',
+  'Exakt dieselben Fragen wie im echten Verfahren – Persönliche Sicht, Ziele, Wohnsituation',
+  {
+    text: 'Deine Antworten als Datei zum Mitnehmen in andere Bearbeitungsprogramme',
+    href: '/bei-generierung/formatkonverter/',
+  },
+  'Bequemer Übertrag in PerSeh mit unterstütztem Ausfüllen aller verbliebenen Felder',
+];
+---
+
+<BaseLayout
+  title="BEI-Generierung"
+  description="Für andere BeWo-Anbieter: BEI-Formular online ausfüllen, wir erstellen daraus eine fertig formulierte Vorlage für euren Hilfeplan."
+>
+  <div class="container prose article">
+    <span class="badge">Digitalprodukt für BeWo-Anbieter</span>
+    <h1>BEI-Generierung</h1>
+    <p class="lead muted">
+      Unterstützung bei der Bedarfsermittlung für andere Anbieter des Betreuten Wohnens: Ihr
+      beantwortet die Fragen des BEI-Formulars in Ruhe online, wir erstellen daraus eine fertig
+      formulierte Vorlage – die mit wenigen Anpassungen zum endgültigen Hilfeplan wird.
+    </p>
+
+    <div class="notice">
+      <strong>⚠️ Vor Launch einrichten</strong>
+      <p style="margin-bottom:0">
+        Lege das Produkt bei Gumroad oder Lemonsqueezy an und trage den Checkout-Link in
+        <code>src/pages/bei-generierung/index.astro</code> (Variable <code>CHECKOUT_URL</code>)
+        ein. Als Redirect nach erfolgreichem Kauf <code>/bei-generierung/bei-formular/</code>
+        hinterlegen. Für die
+        Lizenzpakete ebenso <code>LIZENZ_10_CHECKOUT_URL</code>/<code>LIZENZ_100_CHECKOUT_URL</code>
+        eintragen (oder stattdessen auf eine Kontakt-/Anfrage-Adresse verlinken, falls Träger lieber
+        persönlich anfragen sollen).
+      </p>
+    </div>
+
+    <div class="product">
+      <div class="product-info">
+        <h2 style="margin-top:0">Was ist enthalten?</h2>
+        <ul>
+          {inhalte.map((i) => (
+            <li>{typeof i === 'string' ? i : <a href={i.href}>{i.text}</a>}</li>
+          ))}
+        </ul>
+        <p class="small muted">
+          Format: Online-Formular · Ergebnis als Datei zum Download · Für den privaten Gebrauch.
+        </p>
+      </div>
+
+      <aside class="product-buy">
+        <p class="price">
+          59,99 € <span class="small muted">einmalig</span>
+        </p>
+        <a href={CHECKOUT_URL} class="btn" style="width:100%;text-align:center">
+          Jetzt kaufen
+        </a>
+        <p class="small muted" style="margin:.75rem 0 0">
+          Sichere Abwicklung über einen externen Zahlungsdienstleister.
+        </p>
+      </aside>
+    </div>
+
+    <h2>Lizenzmodell für Träger &amp; Teams</h2>
+    <p>
+      Ihr wollt die BEI-Generierung mehreren Mitarbeitenden oder Klient:innen zur Verfügung
+      stellen? Dafür gibt es Lizenzpakete zum Vorzugspreis:
+    </p>
+
+    <ul class="card-grid lizenz-grid">
+      {
+        lizenzPakete.map((p) => (
+          <li class="card lizenz-card">
+            <h3>{p.anzahl} Lizenzen</h3>
+            <p class="price">{p.preis.toLocaleString('de-DE')} €</p>
+            <p class="small muted">
+              {(p.preis / p.anzahl).toLocaleString('de-DE', { minimumFractionDigits: 2 })} € pro
+              Lizenz
+            </p>
+            <a
+              href={p.anzahl === 10 ? LIZENZ_10_CHECKOUT_URL : LIZENZ_100_CHECKOUT_URL}
+              class="btn btn-secondary"
+              style="width:100%;text-align:center"
+            >
+              Anfragen
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2>Für wen ist das gedacht?</h2>
+    <p>
+      Für andere Anbieter des Betreuten Wohnens (Träger, Teams, Fachkräfte), die bei der
+      BEI-Generierung Zeit sparen wollen. Ihr beantwortet die Fragen aus dem echten BEI-Verfahren
+      strukturiert online – heraus kommt eine fertig formulierte Vorlage, die ihr nur noch mit
+      wenigen Anpassungen zum endgültigen Hilfeplan macht, statt bei null anzufangen.
+    </p>
+
+    <div class="notice">
+      <strong>Hinweis zum Datenschutz</strong>
+      <p style="margin-bottom:0">
+        Deine Angaben im Formular werden ausschließlich in deinem Browser verarbeitet und landen
+        nur in der Datei, die du selbst herunterlädst – es erfolgt keine automatische Übertragung
+        an uns oder Dritte.
+      </p>
+    </div>
+
+    <div class="notice">
+      <strong>Hinweis</strong>
+      <p style="margin-bottom:0">
+        Das Formular ist ein Hilfsmittel zur Vorbereitung und ersetzt keine individuelle Beratung.
+        Die endgültige Bedarfsermittlung erfolgt immer durch den zuständigen Kostenträger.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .product {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin: 1.5rem 0;
+  }
+  .product-buy {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    position: sticky;
+    top: 5rem;
+  }
+  .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0 0 1rem;
+  }
+  @media (max-width: 700px) {
+    .product {
+      grid-template-columns: 1fr;
+    }
+    .product-buy {
+      position: static;
+    }
+  }
+  .lizenz-grid {
+    margin: 1.5rem 0 2rem;
+  }
+  .lizenz-card h3 {
+    margin-top: 0;
+  }
+  .lizenz-card .price {
+    font-size: 1.6rem;
+    margin: 0.25rem 0;
+  }
+</style>

@@ -43,8 +43,8 @@ export const helperTips: HelperTip[] = [
     message: 'Hier findest du kostenlose Rechner und Hilfsmittel für deinen Antrag.',
   },
   {
-    pathPrefix: '/vorlagen',
-    message: 'Fertige Checklisten und Vorlagen zum Download für die Gesprächsvorbereitung.',
+    pathPrefix: '/bei-generierung',
+    message: 'Unterstützung bei der BEI-Generierung für andere BeWo-Anbieter.',
   },
   {
     pathPrefix: '/shop',

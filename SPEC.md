@@ -62,7 +62,7 @@ Rechtsblog-Texte wie bei bestehenden Seiten (assistenzplus.de, ksl-nrw.de, betan
 /tools/widerspruch-generator
 /tools/fristenrechner
 /tools/assistenzstunden-orientierung
-/vorlagen/                     Produktseite (kostenpflichtige Downloads)
+/bei-generierung/              Produktseite (BEI-Generierung für BeWo-Anbieter, kostenpflichtig)
 /ueber-mich                    Trust-/E-E-A-T-Seite (echte Qualifikation zeigen)
 /impressum
 /datenschutz
