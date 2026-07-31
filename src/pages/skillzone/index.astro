@@ -47,10 +47,10 @@ const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
       einfach, sofort nutzbar – ganz ohne Anmeldung.
     </p>
 
-    <CrisisNotice />
+    <div id="skillzone-crisis"><CrisisNotice /></div>
 
     <h2>Kostenlose Übungen</h2>
-    <ul class="card-grid">
+    <ul class="card-grid" id="skillzone-kostenlos">
       {
         kostenlos.map((k) => (
           <li class="card">
@@ -72,7 +72,7 @@ const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
     <p class="muted">
       Ausführlichere Übungen mit gesprochenem Audio – einmalig freischalten, dauerhaft nutzen.
     </p>
-    <ul class="card-grid">
+    <ul class="card-grid" id="skillzone-premium">
       {
         premiumInhalte.map((p) => (
           <li class="card card-locked">
@@ -96,7 +96,7 @@ const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
             Manche Skills wirken über den Körper – ein Skillball, ein intensiver Geruchs- oder
             Geschmacksreiz. Unabhängig vom Premium-Paket direkt bestellbar.
           </p>
-          <ul class="card-grid">
+          <ul class="card-grid" id="skillzone-artikel">
             {skillProdukte.map((p) => (
               <li class="card">
                 <a href={`/shop/${p.id}/`} class="card-link">

@@ -11,7 +11,7 @@ const articles = (await getCollection('ratgeber', ({ data }) => !data.draft)).so
   title="Ratgeber"
   description="Verständliche Artikel rund um Antrag, Bescheid, Bedarfsermittlung und Hilfeplanung in der Eingliederungshilfe."
 >
-  <div class="container prose article">
+  <div class="container prose article" id="ratgeber-intro">
     <h1>Ratgeber</h1>
     <p class="lead muted">
       Schritt-für-Schritt-Erklärungen zur Eingliederungshilfe – vom Antrag über den Bescheid bis
@@ -19,7 +19,7 @@ const articles = (await getCollection('ratgeber', ({ data }) => !data.draft)).so
     </p>
   </div>
 
-  <div class="container">
+  <div class="container" id="ratgeber-liste">
     {
       articles.length === 0 ? (
         <p class="muted">Noch keine Artikel veröffentlicht.</p>

@@ -27,7 +27,7 @@ const tools = [
   title="Tools"
   description="Kostenlose, datensparsame Tools zur Eingliederungshilfe: Fristenrechner, Assistenzstunden-Orientierung und Muster-Widerspruch-Generator."
 >
-  <div class="container prose article">
+  <div class="container prose article" id="tools-intro">
     <h1>Tools</h1>
     <p class="lead muted">
       Alle Tools laufen direkt in deinem Browser. Deine Eingaben verlassen dein Gerät nicht und
@@ -35,7 +35,7 @@ const tools = [
     </p>
   </div>
 
-  <div class="container">
+  <div class="container" id="tools-liste">
     <ul class="card-grid">
       {
         tools.map((t) => (

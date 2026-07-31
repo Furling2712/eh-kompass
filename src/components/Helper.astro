@@ -2,9 +2,10 @@
 import { findHelperTip } from '../data/helper-tips';
 
 const tip = findHelperTip(Astro.url.pathname);
+const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : undefined;
 ---
 
-<div class="helper" id="eh-helper" data-open="false">
+<div class="helper" id="eh-helper" data-open="false" data-tour={tourJson}>
   <button
     type="button"
     id="eh-helper-toggle"
@@ -27,19 +28,44 @@ const tip = findHelperTip(Astro.url.pathname);
 
   <div id="eh-helper-panel" class="helper-panel" role="dialog" aria-label="Navigationshilfe" hidden>
     <button type="button" id="eh-helper-close" class="helper-close" aria-label="Schließen">✕</button>
-    <p>{tip.message}</p>
-    {
-      tip.links && (
-        <ul class="helper-links">
-          {tip.links.map((l) => (
-            <li>
-              <a href={l.href}>{l.label} →</a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
+
+    <div id="eh-helper-idle">
+      <p>{tip.message}</p>
+      {
+        tip.links && (
+          <ul class="helper-links">
+            {tip.links.map((l) => (
+              <li>
+                <a href={l.href}>{l.label} →</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        tourJson && (
+          <button type="button" id="eh-helper-tour-start" class="btn btn-secondary helper-tour-start">
+            Rundgang auf dieser Seite starten
+          </button>
+        )
+      }
+    </div>
+
+    <div id="eh-helper-tour-view" class="helper-tour-view" hidden aria-live="polite">
+      <p class="helper-tour-progress" id="eh-helper-tour-progress"></p>
+      <p id="eh-helper-tour-text"></p>
+      <div class="helper-tour-nav">
+        <button type="button" id="eh-helper-tour-prev" class="btn-secondary">Zurück</button>
+        <button type="button" id="eh-helper-tour-next" class="btn">Weiter</button>
+        <button type="button" id="eh-helper-tour-end" class="helper-tour-end">Rundgang beenden</button>
+      </div>
+    </div>
   </div>
+</div>
+
+<div id="eh-helper-ring" class="helper-tour-ring" hidden aria-hidden="true"></div>
+<div id="eh-helper-walker" class="helper-walker" hidden aria-hidden="true">
+  <div class="helper-walker-inner"></div>
 </div>
 
 <style>
@@ -47,7 +73,7 @@ const tip = findHelperTip(Astro.url.pathname);
     position: fixed;
     right: 1.25rem;
     bottom: 1.25rem;
-    z-index: 100;
+    z-index: 130;
   }
 
   .helper-toggle {
@@ -131,21 +157,172 @@ const tip = findHelperTip(Astro.url.pathname);
     margin-top: 0.4rem;
   }
 
+  .helper-tour-start {
+    margin-top: 0.9rem;
+    width: 100%;
+  }
+
+  /* Rundgang: Ansicht im Panel */
+  .helper-tour-progress {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    margin: 0 0 0.35rem;
+  }
+
+  .helper-tour-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .helper-tour-nav button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    min-height: 2.25rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+
+  .helper-tour-nav .btn {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+  }
+
+  .helper-tour-nav .btn:hover {
+    background: var(--color-primary-dark);
+  }
+
+  .helper-tour-nav button.btn-secondary {
+    background: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+  }
+
+  .helper-tour-nav button.btn-secondary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .helper-tour-end {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.4rem 0;
+    margin-left: auto;
+  }
+
+  /* Rundgang: Fokus-Ring um das Ziel-Element */
+  .helper-tour-ring {
+    position: fixed;
+    border: 3px solid var(--color-primary);
+    border-radius: var(--radius);
+    box-shadow: 0 0 0 4px rgba(31, 111, 107, 0.15);
+    pointer-events: none;
+    z-index: 105;
+    transition: top 0.4s ease, left 0.4s ease, width 0.4s ease, height 0.4s ease;
+    animation: helper-ring-pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes helper-ring-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 4px rgba(31, 111, 107, 0.15);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(31, 111, 107, 0.06);
+    }
+  }
+
+  /* Rundgang: laufende Eule */
+  .helper-walker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 3.5rem;
+    height: 3.5rem;
+    z-index: 110;
+    pointer-events: none;
+    transition: transform 0.5s ease;
+  }
+
+  .helper-walker-inner {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(var(--shadow));
+  }
+
+  .helper-walker-inner :global(.helper-owl) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .helper-walker.walking .helper-walker-inner {
+    animation: helper-walk-bob 0.5s ease-in-out infinite;
+  }
+
+  @keyframes helper-walk-bob {
+    0%, 100% {
+      transform: translateY(0) rotate(-4deg);
+    }
+    50% {
+      transform: translateY(-6px) rotate(4deg);
+    }
+  }
+
   @media (max-width: 480px) {
     .helper {
       right: 1rem;
       bottom: 1rem;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .helper-owl-pupil {
+      animation: none;
+    }
+    .helper-toggle:hover .helper-owl {
+      transform: none;
+    }
+    .helper-tour-ring {
+      animation: none;
+      transition: none;
+    }
+    .helper-walker {
+      transition: none;
+    }
+    .helper-walker.walking .helper-walker-inner {
+      animation: none;
+    }
+  }
 </style>
 
 <script>
+  import type { HelperTourStep } from '../data/helper-tips';
+
   const root = document.getElementById('eh-helper') as HTMLDivElement;
   const toggle = document.getElementById('eh-helper-toggle') as HTMLButtonElement;
   const panel = document.getElementById('eh-helper-panel') as HTMLDivElement;
   const closeBtn = document.getElementById('eh-helper-close') as HTMLButtonElement;
+  const idleView = document.getElementById('eh-helper-idle') as HTMLDivElement;
+  const tourView = document.getElementById('eh-helper-tour-view') as HTMLDivElement;
+  const tourStartBtn = document.getElementById('eh-helper-tour-start') as HTMLButtonElement | null;
+  const tourPrevBtn = document.getElementById('eh-helper-tour-prev') as HTMLButtonElement;
+  const tourNextBtn = document.getElementById('eh-helper-tour-next') as HTMLButtonElement;
+  const tourEndBtn = document.getElementById('eh-helper-tour-end') as HTMLButtonElement;
+  const tourProgress = document.getElementById('eh-helper-tour-progress') as HTMLParagraphElement;
+  const tourText = document.getElementById('eh-helper-tour-text') as HTMLParagraphElement;
+  const ring = document.getElementById('eh-helper-ring') as HTMLDivElement;
+  const walker = document.getElementById('eh-helper-walker') as HTMLDivElement;
+  const walkerInner = walker.querySelector('.helper-walker-inner') as HTMLDivElement;
 
   const STORAGE_KEY = 'eh-helper-open';
+
+  let tourActive = false;
 
   function setOpen(open: boolean) {
     panel.hidden = !open;
@@ -154,10 +331,209 @@ const tip = findHelperTip(Astro.url.pathname);
     localStorage.setItem(STORAGE_KEY, open ? '1' : '0');
   }
 
-  toggle.addEventListener('click', () => setOpen(panel.hidden));
-  closeBtn.addEventListener('click', () => setOpen(false));
+  toggle.addEventListener('click', () => {
+    if (tourActive) return;
+    setOpen(panel.hidden);
+  });
+
+  closeBtn.addEventListener('click', () => {
+    if (tourActive) {
+      endTour();
+    } else {
+      setOpen(false);
+    }
+  });
 
   if (localStorage.getItem(STORAGE_KEY) === '1') {
     setOpen(true);
   }
+
+  // --- Rundgang ---
+
+  let steps: HelperTourStep[] = [];
+  try {
+    const raw = root.dataset.tour;
+    if (raw) steps = JSON.parse(raw);
+  } catch {
+    steps = [];
+  }
+
+  let currentStep = -1;
+  let activeTarget: Element | null = null;
+  let repositionScheduled = false;
+
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let reduceMotion = motionQuery.matches;
+  motionQuery.addEventListener('change', (e) => {
+    reduceMotion = e.matches;
+  });
+
+  function ensureWalkerIcon() {
+    if (walkerInner.querySelector('svg')) return;
+    const src = toggle.querySelector('svg');
+    if (src) walkerInner.appendChild(src.cloneNode(true));
+  }
+
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function moveWalkerTo(x: number, y: number) {
+    walker.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  function updateRingAndWalker(target: Element) {
+    const rect = target.getBoundingClientRect();
+    ring.style.top = `${rect.top - 6}px`;
+    ring.style.left = `${rect.left - 6}px`;
+    ring.style.width = `${rect.width + 12}px`;
+    ring.style.height = `${rect.height + 12}px`;
+
+    const size = walker.getBoundingClientRect().width || 56;
+    const gap = 14;
+    const margin = 8;
+
+    // Eule bevorzugt seitlich neben dem Zielbereich andocken (nicht darüber), damit sie nicht in
+    // den Text/Content über dem Ziel hineinragt. Fällt bei wenig Platz (schmale Viewports) auf ein
+    // Andocken an die obere Ecke zurück.
+    const spaceLeft = rect.left - margin;
+    const spaceRight = window.innerWidth - rect.right - margin;
+
+    let x: number;
+    if (spaceLeft >= size + gap && spaceLeft >= spaceRight) {
+      x = rect.left - size - gap;
+    } else if (spaceRight >= size + gap) {
+      x = rect.right + gap;
+    } else {
+      x = rect.left - size * 0.3;
+    }
+    x = clamp(x, margin, window.innerWidth - size - margin);
+
+    const y =
+      spaceLeft >= size + gap || spaceRight >= size + gap
+        ? clamp(rect.top + rect.height / 2 - size / 2, margin, window.innerHeight - size - margin)
+        : clamp(rect.top - size - gap, margin, window.innerHeight - size - margin);
+    moveWalkerTo(x, y);
+  }
+
+  function scheduleReposition() {
+    if (!tourActive || !activeTarget || repositionScheduled) return;
+    repositionScheduled = true;
+    requestAnimationFrame(() => {
+      repositionScheduled = false;
+      if (tourActive && activeTarget) updateRingAndWalker(activeTarget);
+    });
+  }
+
+  window.addEventListener('scroll', scheduleReposition, { passive: true });
+  window.addEventListener('resize', scheduleReposition);
+
+  function goToStep(index: number) {
+    const step = steps[index];
+    if (!step) return;
+    const target = document.querySelector(step.selector);
+    if (!target) {
+      endTour();
+      return;
+    }
+
+    currentStep = index;
+    activeTarget = target;
+
+    target.scrollIntoView({
+      block: 'center',
+      behavior: reduceMotion ? 'instant' : 'smooth',
+    });
+
+    const settle = () => {
+      if (!reduceMotion) {
+        walker.classList.add('walking');
+        const onArrive = (e: TransitionEvent) => {
+          if (e.propertyName !== 'transform') return;
+          walker.classList.remove('walking');
+          walker.removeEventListener('transitionend', onArrive);
+        };
+        walker.addEventListener('transitionend', onArrive);
+      }
+      updateRingAndWalker(target);
+    };
+    if (reduceMotion) {
+      settle();
+    } else {
+      window.setTimeout(settle, 450);
+    }
+
+    tourText.textContent = step.message;
+    tourProgress.textContent = `Schritt ${index + 1} von ${steps.length}`;
+    tourPrevBtn.toggleAttribute('disabled', index === 0);
+    tourNextBtn.textContent = index === steps.length - 1 ? 'Fertig' : 'Weiter';
+
+    ring.hidden = false;
+    walker.hidden = false;
+
+    tourNextBtn.focus();
+  }
+
+  function startTour() {
+    if (steps.length === 0) return;
+    tourActive = true;
+    ensureWalkerIcon();
+    idleView.hidden = true;
+    tourView.hidden = false;
+    setOpen(true);
+
+    const home = toggle.getBoundingClientRect();
+    walker.style.transition = 'none';
+    moveWalkerTo(home.left, home.top);
+    walker.hidden = false;
+    void walker.offsetWidth; // Reflow erzwingen, damit der Startpunkt vor der Transition gesetzt ist.
+    walker.style.transition = '';
+
+    goToStep(0);
+  }
+
+  function endTour() {
+    const home = toggle.getBoundingClientRect();
+    if (!reduceMotion) {
+      walker.classList.add('walking');
+      moveWalkerTo(home.left, home.top);
+      window.setTimeout(() => {
+        walker.hidden = true;
+        walker.classList.remove('walking');
+      }, 500);
+    } else {
+      walker.hidden = true;
+    }
+
+    ring.hidden = true;
+    tourActive = false;
+    currentStep = -1;
+    activeTarget = null;
+    idleView.hidden = false;
+    tourView.hidden = true;
+    setOpen(false);
+    toggle.focus();
+  }
+
+  tourStartBtn?.addEventListener('click', startTour);
+
+  tourNextBtn.addEventListener('click', () => {
+    if (currentStep >= steps.length - 1) {
+      endTour();
+    } else {
+      goToStep(currentStep + 1);
+    }
+  });
+
+  tourPrevBtn.addEventListener('click', () => {
+    if (currentStep > 0) goToStep(currentStep - 1);
+  });
+
+  tourEndBtn.addEventListener('click', endTour);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && tourActive) {
+      endTour();
+    }
+  });
 </script>

@@ -14,7 +14,7 @@ import { kategorien, produkte } from '../../data/shop-produkte';
       Systemiker, mit Sorgfalt in eigener Werkstatt hergestellt.
     </p>
 
-    <ul class="card-grid kategorie-grid">
+    <ul class="card-grid kategorie-grid" id="shop-kategorien">
       {
         kategorien.map((k) => {
           const anzahl = produkte.filter((p) => p.kategorieSlug === k.slug).length;
@@ -32,7 +32,7 @@ import { kategorien, produkte } from '../../data/shop-produkte';
       }
     </ul>
 
-    <p><a href="/shop/warenkorb/" class="btn btn-secondary">Zum Warenkorb →</a></p>
+    <p id="shop-warenkorb-link"><a href="/shop/warenkorb/" class="btn btn-secondary">Zum Warenkorb →</a></p>
   </div>
 </BaseLayout>
 
