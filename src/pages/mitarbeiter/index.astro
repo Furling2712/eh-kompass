@@ -65,7 +65,7 @@ const optionaleBereiche = [
     <h1>Mitarbeiterbereich</h1>
     <p class="lead muted">Interner Bereich für PerSeh-Mitarbeiter.</p>
 
-    <a href="/mitarbeiter/systemtherapie/" class="card card-featured">
+    <a href="/mitarbeiter/systemtherapie/" class="card card-featured" id="dash-systemtherapie">
       <span class="badge">Im Aufbau</span>
       <h2>Systemtherapeutische Methoden für die Eingliederungshilfe</h2>
       <p>
@@ -77,7 +77,7 @@ const optionaleBereiche = [
 
     <h2>Pflichtbereiche</h2>
     <p class="small muted">Diese Bereiche sind für alle Mitarbeiter verpflichtend.</p>
-    <ul class="card-grid">
+    <ul class="card-grid" id="dash-pflicht">
       {
         pflichtBereiche.map((b) => (
           <li class="card card-pflicht">
@@ -98,7 +98,7 @@ const optionaleBereiche = [
 
     <h2>Optional – zum Nachschlagen</h2>
     <p class="small muted">Diese Bereiche sind freiwillig und können bei Bedarf genutzt werden.</p>
-    <ul class="card-grid">
+    <ul class="card-grid" id="dash-optional">
       {
         optionaleBereiche.map((b) => (
           <li class="card">
