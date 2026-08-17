@@ -189,7 +189,7 @@ export const produkte: ShopProdukt[] = [
     id: 'erdungswuerfel',
     name: 'Erdungswürfel 5-4-3-2-1',
     beschreibung:
-      'Handlicher Holzwürfel mit eingravierter 5-4-3-2-1-Übung – für den Moment, in dem gerade kein Handy oder Zettel zur Hand ist. Das haptische Gegenstück zu unserer Anleitung in der Skill-Zone.',
+      'Handlicher Holzwürfel mit eingravierter 5-4-3-2-1-Übung – für den Moment, in dem gerade kein Handy oder Zettel zur Hand ist. Das haptische Gegenstück zu unserer Anleitung im Notfallzimmer.',
     details: [
       'Würfel aus Buchenholz, ca. 4 × 4 × 4 cm',
       '5-4-3-2-1-Übung auf den Seitenflächen eingraviert',
