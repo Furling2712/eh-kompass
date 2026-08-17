@@ -200,31 +200,31 @@ export const helperTips: HelperTip[] = [
     ],
   },
 
-  // --- Skill-Zone ---
+  // --- Notfallzimmer ---
   {
-    pathPrefix: '/skillzone',
+    pathPrefix: '/notfallzimmer',
     message: 'Diese Übung führt dich Schritt für Schritt – folge einfach der Anleitung auf der Seite.',
   },
   {
-    pathPrefix: '/skillzone',
+    pathPrefix: '/notfallzimmer',
     exact: true,
     message: 'Werkzeuge für den Moment, wenn Anspannung oder Krise gerade sehr hoch sind.',
     tour: [
       {
-        selector: '#skillzone-crisis',
+        selector: '#notfallzimmer-crisis',
         message:
           'Wichtig zuerst: Bei akuter Krise wähl den Notruf oder die Telefonseelsorge – diese Übungen sind nur für den Alltag gedacht.',
       },
       {
-        selector: '#skillzone-kostenlos',
+        selector: '#notfallzimmer-kostenlos',
         message: 'Diese drei Übungen sind komplett kostenlos und ohne Anmeldung sofort nutzbar.',
       },
       {
-        selector: '#skillzone-premium',
+        selector: '#notfallzimmer-premium',
         message: 'Wer mehr möchte: ausführlichere Übungen mit gesprochenem Audio zum einmaligen Freischalten.',
       },
       {
-        selector: '#skillzone-artikel',
+        selector: '#notfallzimmer-artikel',
         message: 'Manche Skills wirken über den Körper – zum Beispiel ein Skillball oder ein Geruchsreiz zum Bestellen.',
       },
     ],

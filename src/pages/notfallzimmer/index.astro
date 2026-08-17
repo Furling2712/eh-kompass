@@ -9,26 +9,26 @@ const PREMIUM_CHECKOUT_URL = '#';
 
 const kostenlos = [
   {
-    href: '/skillzone/atemuebung',
+    href: '/notfallzimmer/atemuebung',
     title: 'Box-Atmung',
     desc: 'Ein animierter Kreis führt dich durch einen ruhigen 4-4-4-4-Atemrhythmus.',
     icon: '🫁',
   },
   {
-    href: '/skillzone/erdung-54321',
+    href: '/notfallzimmer/erdung-54321',
     title: '5-4-3-2-1 Erdungsübung',
     desc: 'Schritt für Schritt über die Sinne zurück ins Hier und Jetzt.',
     icon: '🖐️',
   },
   {
-    href: '/skillzone/fokus-spiel',
+    href: '/notfallzimmer/fokus-spiel',
     title: 'Blasen zerplatzen',
     desc: 'Ruhiges Ablenkungsspiel für den Kopf – ohne Punktedruck, ohne Verlieren.',
     icon: '🫧',
   },
 ];
 
-const premiumInhalte = (await getCollection('skillzone', ({ data }) => data.premium && !data.draft)).sort(
+const premiumInhalte = (await getCollection('notfallzimmer', ({ data }) => data.premium && !data.draft)).sort(
   (a, b) => a.data.order - b.data.order
 );
 
@@ -36,21 +36,21 @@ const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
 ---
 
 <BaseLayout
-  title="Skill-Zone"
+  title="Notfallzimmer"
   description="Kostenlose Selbstregulations-Übungen für den Moment, in dem es gerade zu viel wird – Atmung, Erdung und Ablenkung. Plus Premium-Inhalte und Skill-Artikel zum Bestellen."
 >
   <div class="container prose article">
     <span class="badge">Für dich</span>
-    <h1>Skill-Zone</h1>
+    <h1>Notfallzimmer</h1>
     <p class="lead muted">
       Werkzeuge für den Moment, wenn Anspannung, Ärger oder Krise gerade sehr hoch sind. Kurz,
       einfach, sofort nutzbar – ganz ohne Anmeldung.
     </p>
 
-    <div id="skillzone-crisis"><CrisisNotice /></div>
+    <div id="notfallzimmer-crisis"><CrisisNotice /></div>
 
     <h2>Kostenlose Übungen</h2>
-    <ul class="card-grid" id="skillzone-kostenlos">
+    <ul class="card-grid" id="notfallzimmer-kostenlos">
       {
         kostenlos.map((k) => (
           <li class="card">
@@ -72,7 +72,7 @@ const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
     <p class="muted">
       Ausführlichere Übungen mit gesprochenem Audio – einmalig freischalten, dauerhaft nutzen.
     </p>
-    <ul class="card-grid" id="skillzone-premium">
+    <ul class="card-grid" id="notfallzimmer-premium">
       {
         premiumInhalte.map((p) => (
           <li class="card card-locked">
@@ -96,7 +96,7 @@ const skillProdukte = produkte.filter((p) => p.kategorie === 'Skills');
             Manche Skills wirken über den Körper – ein Skillball, ein intensiver Geruchs- oder
             Geschmacksreiz. Unabhängig vom Premium-Paket direkt bestellbar.
           </p>
-          <ul class="card-grid" id="skillzone-artikel">
+          <ul class="card-grid" id="notfallzimmer-artikel">
             {skillProdukte.map((p) => (
               <li class="card">
                 <a href={`/shop/${p.id}/`} class="card-link">

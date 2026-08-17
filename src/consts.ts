@@ -9,7 +9,7 @@ export const NAV_LINKS = [
   { href: '/ratgeber/', label: 'Ratgeber' },
   { href: '/glossar/', label: 'Glossar' },
   { href: '/tools/', label: 'Tools' },
-  { href: '/skillzone/', label: 'Skill-Zone' },
+  { href: '/notfallzimmer/', label: 'Notfallzimmer' },
   { href: '/bei-generierung/', label: 'BEI-Generierung' },
   { href: '/shop/', label: 'Shop' },
   { href: '/online-bewo/', label: 'Online-BeWo' },

@@ -77,10 +77,10 @@ const selbstfuersorge = defineCollection({
   }),
 });
 
-// Öffentliche Skill-Zone für Klient:innen (nicht der Mitarbeiter-Bereich!). Freie Einträge
+// Öffentliches Notfallzimmer für Klient:innen (nicht der Mitarbeiter-Bereich!). Freie Einträge
 // werden direkt gezeigt, premium:true-Einträge erscheinen als gesperrte Vorschau-Karte.
-const skillzone = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/skillzone' }),
+const notfallzimmer = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/notfallzimmer' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -98,5 +98,5 @@ export const collections = {
   videos,
   erfahrungsschatz,
   selbstfuersorge,
-  skillzone,
+  notfallzimmer,
 };
