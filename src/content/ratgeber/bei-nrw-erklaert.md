@@ -2,7 +2,7 @@
 title: 'BEI_NRW erklärt: So läuft die Bedarfsermittlung ab'
 description: 'Was ist der BEI_NRW, wie läuft das Gespräch ab und wie bereitest du dich gut vor? Ein Praxis-Überblick zur Bedarfsermittlung in Nordrhein-Westfalen.'
 pubDate: 2026-07-03
-order: 3
+order: 4
 stand: 'Juli 2026'
 ---
 

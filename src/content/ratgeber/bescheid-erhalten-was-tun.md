@@ -72,3 +72,10 @@ Du musst das nicht allein machen. Kostenlose, unabhängige Anlaufstellen sind zu
 
 Am wichtigsten ist Schritt 1: **Die Frist im Blick behalten.** Alles Weitere lässt sich mit Ruhe
 und Unterstützung angehen.
+
+## Du bist generell überfordert mit all den Dokumenten?
+
+Du bist nicht allein! Hier bekommst du Hilfe: In
+[Eingliederungshilfe nach § 113 SGB IX – einfach erklärt](/ratgeber/eingliederungshilfe-einfach-erklaert)
+erklären wir in einfacher Sprache, worum es bei der Eingliederungshilfe überhaupt geht – als
+Grundlage, um Bescheide und Verfahren besser zu verstehen.

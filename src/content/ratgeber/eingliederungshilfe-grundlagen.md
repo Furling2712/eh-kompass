@@ -1,8 +1,8 @@
 ---
-title: 'Eingliederungshilfe: Grundlagen einfach erklärt'
+title: 'Eingliederungshilfe – Ablauf und Verfahrensgrundlagen'
 description: 'Was ist Eingliederungshilfe nach § 113 SGB IX, wer hat Anspruch und wie läuft das Verfahren ab? Ein verständlicher Überblick für den Einstieg.'
 pubDate: 2026-07-02
-order: 2
+order: 3
 stand: 'Juli 2026'
 quelle: 'https://www.gesetze-im-internet.de/sgb_9_2018/__113.html'
 quelleLabel: '§ 113 SGB IX'
@@ -41,8 +41,8 @@ bleiben.
 Grob gibt es vier Etappen:
 
 1. **Antrag** beim zuständigen Träger der Eingliederungshilfe stellen.
-2. **Bedarfsermittlung:** Mit einem strukturierten Instrument (z. B. BEI_NRW, PerSEH, B.E.Ni – je
-   nach Bundesland) wird dein individueller Bedarf erhoben.
+2. **Bedarfsermittlung:** Mit einem strukturierten Instrument (z. B. [BEI_NRW](/ratgeber/bei-nrw-erklaert),
+   PerSEH, B.E.Ni – je nach Bundesland) wird dein individueller Bedarf erhoben.
 3. **Teilhabe-/Gesamtplanung:** Gemeinsam werden Ziele und passende Leistungen festgelegt.
 4. **Bescheid:** Du bekommst schriftlich mitgeteilt, was in welchem Umfang bewilligt wird.
 
@@ -62,6 +62,8 @@ unserem [Glossar](/glossar/) – von **ICF** über **BEI** bis **Teilhabe**.
 
 ## Nächste Schritte
 
+- Mehr zur Bedarfsermittlung in NRW:
+  [So läuft die Bedarfsermittlung ab](/ratgeber/bei-nrw-erklaert).
 - Verschaffe dir einen Überblick über die [wichtigsten Begriffe](/glossar/).
 - Wenn ein Gespräch ansteht: Bereite dich mit unserer
   [Assistenzstunden-Orientierung](/tools/assistenzstunden-orientierung) gedanklich vor.

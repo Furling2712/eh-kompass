@@ -2,7 +2,7 @@
 title: 'Eingliederungshilfe nach § 113 SGB IX – einfach erklärt'
 description: 'Eingliederungshilfe in Leichter Sprache: was sie ist, welche Hilfen es gibt und wer sie bekommen kann.'
 pubDate: 2026-07-15
-order: 0
+order: 2
 stand: 'Juli 2026'
 quelle: 'https://www.gesetze-im-internet.de/sgb_9_2018/__113.html'
 quelleLabel: '§ 113 SGB IX'
@@ -41,7 +41,45 @@ Menschen mit einer Behinderung können diese Hilfe bekommen.
 Es kommt immer auf die persönliche Situation an.
 Ein Amt prüft, welche Hilfe genau passt.
 
-## Wo bekomme ich mehr Informationen?
+## Wie bekomme ich diese Hilfe?
 
-Gerne beraten wir Sie persönlich.
-Sprechen Sie uns einfach an.
+Sie stellen einen Antrag.
+Der Antrag geht an das Amt für Eingliederungshilfe in Ihrer Stadt oder Ihrem Kreis.
+Das Amt prüft Ihren Antrag.
+
+Danach gibt es ein Gespräch.
+In dem Gespräch wird geschaut: Welche Hilfe brauchen Sie genau?
+Das nennt man Bedarfsermittlung.
+
+Am Ende bekommen Sie einen Brief.
+Das ist der Bescheid.
+Im Bescheid steht, welche Hilfe Sie bekommen.
+
+## Ich habe schon einen Bescheid bekommen. Was mache ich jetzt?
+
+Dafür gibt es eine eigene Anleitung:
+[Bescheid bekommen – was tun? Checkliste in 5 Schritten](/ratgeber/bescheid-erhalten-was-tun).
+Dort steht Schritt für Schritt, was Sie jetzt tun können.
+
+## Ich brauche Hilfe beim Verstehen
+
+Sie müssen das nicht allein verstehen.
+
+Es gibt Beratungsstellen. Die helfen kostenlos.
+Zum Beispiel die **EUTB** (Ergänzende unabhängige Teilhabeberatung).
+
+Auch Ihr Betreuer oder Ihre Betreuerin kann Ihnen helfen.
+
+Fragen Sie ruhig nach, wenn Sie etwas nicht verstehen. Das ist ganz normal.
+
+## Ich fühle mich gerade überfordert oder in einer Krise
+
+Das kann passieren. Sie sind damit nicht allein.
+
+In unserem [Notfallzimmer](/notfallzimmer/) finden Sie einfache Übungen.
+Die können in so einem Moment helfen.
+
+## Mehr erfahren
+
+Mehr über den Ablauf und die Regeln der Eingliederungshilfe erklären wir hier:
+[Eingliederungshilfe – Ablauf und Verfahrensgrundlagen](/ratgeber/eingliederungshilfe-grundlagen).

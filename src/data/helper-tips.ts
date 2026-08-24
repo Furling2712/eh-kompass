@@ -39,7 +39,7 @@ export const helperTips: HelperTip[] = [
     pathPrefix: '/ratgeber',
     message: 'Hier findest du Artikel, die dir den Ablauf und deine Möglichkeiten erklären.',
     links: [
-      { href: '/ratgeber/eingliederungshilfe-grundlagen', label: 'Am besten hier anfangen' },
+      { href: '/ratgeber/eingliederungshilfe-einfach-erklaert', label: 'Am besten hier anfangen' },
     ],
   },
   {
@@ -50,7 +50,7 @@ export const helperTips: HelperTip[] = [
       {
         selector: '#ratgeber-intro',
         message:
-          'Die Artikel sind in sinnvoller Reihenfolge sortiert – am besten von oben nach unten lesen, wenn du ganz neu hier bist.',
+          'Die Artikel sind in sinnvoller Reihenfolge sortiert – am besten von links nach rechts lesen, wenn du ganz neu hier bist.',
       },
       {
         selector: '#ratgeber-liste',
@@ -142,6 +142,12 @@ export const helperTips: HelperTip[] = [
           'Wähl das passende Tool: Frist berechnen, Assistenzstunden grob einschätzen oder einen Widerspruch vorbereiten.',
       },
     ],
+  },
+
+  // --- Für andere BeWo-Anbieter ---
+  {
+    pathPrefix: '/bewo-anbieter',
+    message: 'Ein Überblick für andere BeWo-Träger: BEI-Generierung, Therapiematerialien und ein Feedback-Formular.',
   },
 
   // --- BEI-Generierung ---
@@ -237,10 +243,6 @@ export const helperTips: HelperTip[] = [
   },
 
   // --- Einfache Einzelseiten (keine Touren) ---
-  {
-    pathPrefix: '/ueber-mich',
-    message: 'Hier erfährst du, wer hinter EH-Kompass steckt und warum es diese Seite gibt.',
-  },
   {
     pathPrefix: '/datenschutz',
     message: 'Hier findest du die Datenschutzerklärung dieser Seite.',
