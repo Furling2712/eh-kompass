@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const bereiche = [
+  {
+    href: '/bei-generierung/',
+    title: 'BEI-Generierung',
+    desc: 'Füllt das BEI-Formular online aus – wir erstellen daraus eine fertig formulierte Vorlage für euren Hilfeplan. Spart Zeit bei der Bedarfsermittlung, inklusive Lizenzpaketen für ganze Teams.',
+    cta: 'Mehr erfahren',
+  },
+  {
+    href: '/shop/therapie-paedagogik/',
+    title: 'Therapie- & Coaching-Materialien',
+    desc: 'Handgefertigte Materialien aus unserer eigenen Werkstatt – Aufstellungsbrett, Sandspiel-Kiste, Bodenanker-Set und mehr für eure eigene Arbeit mit Klient:innen.',
+    cta: 'Zu den Produkten',
+  },
+];
+---
+
+<BaseLayout
+  title="Für andere BeWo-Anbieter"
+  description="Ein Überblick für Kolleg:innen bei anderen Anbietern des Betreuten Wohnens: BEI-Generierung, Therapiematerialien und ein Feedback-Formular für gemeinsame Ideen."
+>
+  <div class="container prose article">
+    <span class="badge">Für andere BeWo-Anbieter</span>
+    <h1>Hallo Kolleg:innen!</h1>
+    <p class="lead muted">
+      Hier haben wir ein paar Dinge zusammengestellt, die vielleicht auch für euch interessant
+      sind – Angebote, die aus unserer eigenen Arbeit im Betreuten Wohnen entstanden sind und die
+      wir gerne mit anderen Anbietern teilen.
+    </p>
+
+    <ul class="card-grid" id="bewo-bereiche">
+      {
+        bereiche.map((b) => (
+          <li class="card">
+            <h2>
+              <a href={b.href} class="card-link">
+                {b.title}
+              </a>
+            </h2>
+            <p>{b.desc}</p>
+            <a href={b.href} class="btn btn-secondary">
+              {b.cta} →
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2>Ideen &amp; Feedback</h2>
+    <p>
+      Habt ihr Verbesserungsvorschläge für diese Seite oder Ideen, wie wir gemeinsam Betreutes
+      Wohnen lebendiger und besser erreichbar gestalten können? Wir freuen uns über eure
+      Nachricht.
+    </p>
+
+    <form
+      name="bewo-feedback"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      action="/bewo-anbieter/danke/"
+      class="tool-box"
+    >
+      <input type="hidden" name="form-name" value="bewo-feedback" />
+      <p class="visually-hidden">
+        <label>
+          Bitte nicht ausfüllen: <input name="bot-field" tabindex="-1" autocomplete="off" />
+        </label>
+      </p>
+
+      <div class="field">
+        <label for="feedback-name">Name / Einrichtung (optional)</label>
+        <input type="text" id="feedback-name" name="name" autocomplete="organization" />
+      </div>
+
+      <div class="field">
+        <label for="feedback-email">E-Mail (optional, falls ihr eine Antwort möchtet)</label>
+        <input type="email" id="feedback-email" name="email" autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="feedback-nachricht">Eure Nachricht</label>
+        <textarea id="feedback-nachricht" name="nachricht" rows="5" required></textarea>
+      </div>
+
+      <button type="submit" class="btn">Absenden</button>
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>
