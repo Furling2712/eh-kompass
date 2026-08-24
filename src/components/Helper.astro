@@ -6,6 +6,10 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
 ---
 
 <div class="helper" id="eh-helper" data-open="false" data-tour={tourJson}>
+  <p id="eh-helper-callout" class="helper-callout" aria-hidden="true">
+    Du brauchst Hilfe?<br />Klick mich!
+  </p>
+
   <button
     type="button"
     id="eh-helper-toggle"
@@ -23,13 +27,14 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
       <circle class="helper-owl-pupil" cx="42" cy="32" r="5" fill="#2b2117" />
       <path d="M29 42 L32 47 L35 42 Z" fill="#e8a33d" />
     </svg>
-    <span class="visually-hidden">Hilfe zur Navigation öffnen</span>
+    <span class="visually-hidden">Hilfe von Alex, unserer Navigationshilfe, öffnen</span>
   </button>
 
-  <div id="eh-helper-panel" class="helper-panel" role="dialog" aria-label="Navigationshilfe" hidden>
+  <div id="eh-helper-panel" class="helper-panel" role="dialog" aria-label="Navigationshilfe von Alex" hidden>
     <button type="button" id="eh-helper-close" class="helper-close" aria-label="Schließen">✕</button>
 
     <div id="eh-helper-idle">
+      <p class="helper-name">🦉 Alex</p>
       <p>{tip.message}</p>
       {
         tip.links && (
@@ -74,6 +79,65 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
     right: 1.25rem;
     bottom: 1.25rem;
     z-index: 130;
+  }
+
+  .helper-callout {
+    position: absolute;
+    right: 0;
+    bottom: 3.9rem;
+    margin: 0;
+    width: 6.5rem;
+    padding: 0.4rem 0.55rem;
+    background: #fff;
+    color: #2b2117;
+    border-radius: 0.8rem 0.8rem 0.2rem 0.8rem;
+    box-shadow: var(--shadow);
+    font-family: 'Segoe Script', 'Bradley Hand', 'Comic Sans MS', cursive;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    text-align: center;
+    transform: rotate(-3deg);
+    transform-origin: bottom right;
+    pointer-events: none;
+    animation: helper-callout-bounce 2.4s ease-in-out infinite;
+  }
+
+  .helper-callout::after {
+    content: '';
+    position: absolute;
+    right: 0.75rem;
+    bottom: -0.35rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    background: inherit;
+    clip-path: polygon(0 0, 100% 0, 40% 100%);
+  }
+
+  .helper[data-open='true'] .helper-callout {
+    display: none;
+  }
+
+  @keyframes helper-callout-bounce {
+    0%, 100% {
+      transform: rotate(-3deg) translateY(0);
+    }
+    50% {
+      transform: rotate(-3deg) translateY(-4px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .helper-callout {
+      width: 5.8rem;
+      font-size: 0.7rem;
+      bottom: 3.6rem;
+    }
+  }
+
+  .helper-name {
+    margin: 0 0 0.35rem !important;
+    font-weight: 700;
+    color: var(--color-primary);
   }
 
   .helper-toggle {
@@ -282,6 +346,9 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .helper-callout {
+      animation: none;
+    }
     .helper-owl-pupil {
       animation: none;
     }
@@ -324,6 +391,9 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
 
   let tourActive = false;
 
+  // Der Hinweis-Schriftzug ("Du brauchst Hilfe?") bleibt bewusst dauerhaft sichtbar (nur
+  // ausgeblendet, während das Panel offen ist) – Klient:innen sollen ihn immer wiederfinden,
+  // statt dass er sich nach dem ersten Klick für immer versteckt.
   function setOpen(open: boolean) {
     panel.hidden = !open;
     toggle.setAttribute('aria-expanded', String(open));

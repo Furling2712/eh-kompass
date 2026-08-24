@@ -25,7 +25,7 @@ const {
 const pageTitle = title ? `${title} — ${SITE_TITLE}` : `${SITE_TITLE} — ${SITE_DESCRIPTION}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href;
 const ogImage = new URL(image, Astro.site ?? Astro.url.origin).href;
-// Öffentliche Seite: KI-Helfer-Eule. Mitarbeiterbereich: Dennis, unser Vereinsmaskottchen.
+// Öffentliche Seite: KI-Helfer-Eule "Alex". Mitarbeiterbereich: Dennis, unser Vereinsmaskottchen.
 const isMitarbeiterbereich = Astro.url.pathname.startsWith('/mitarbeiter');
 const showHelper = !isMitarbeiterbereich;
 const showMitarbeiterHelper = isMitarbeiterbereich;
