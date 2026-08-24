@@ -10,10 +10,9 @@ export const NAV_LINKS = [
   { href: '/glossar/', label: 'Glossar' },
   { href: '/tools/', label: 'Tools' },
   { href: '/notfallzimmer/', label: 'Notfallzimmer' },
-  { href: '/bei-generierung/', label: 'BEI-Generierung' },
-  { href: '/shop/', label: 'Shop' },
+  { href: '/bewo-anbieter/', label: 'Für andere BeWo-Anbieter' },
   { href: '/online-bewo/', label: 'Online-BeWo' },
-  { href: '/ueber-mich', label: 'Über mich' },
+  { href: '/impressum', label: 'Impressum' },
 ];
 
 // Footer-Rechtslinks
