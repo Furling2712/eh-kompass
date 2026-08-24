@@ -1,0 +1,217 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { mitarbeiterListe } from '../../../data/mitarbeiter';
+import { fortbildungen } from '../../../data/fortbildungen';
+import { ladeAlleStatus, type StatusEintrag } from '../../../lib/fortbildungen';
+
+const MONAT_MS = 30 * 24 * 60 * 60 * 1000;
+
+let alleStatus: StatusEintrag[] = [];
+let ladeFehler = '';
+try {
+  alleStatus = await ladeAlleStatus();
+} catch (err) {
+  ladeFehler = err instanceof Error ? err.message : String(err);
+}
+
+const statusMap = new Map(alleStatus.map((s) => [`${s.mitarbeiterId}:${s.fobiId}`, s]));
+
+interface Zeile {
+  mitarbeiterName: string;
+  fobiTitel: string;
+  mitarbeiterId: string;
+  fobiId: string;
+  zustand: 'offen' | 'bestanden' | 'faellig';
+  hinweis: string;
+}
+
+const zeilen: Zeile[] = [];
+for (const m of mitarbeiterListe) {
+  for (const f of fortbildungen) {
+    const status = statusMap.get(`${m.id}:${f.id}`);
+    if (!status) {
+      zeilen.push({
+        mitarbeiterName: m.name,
+        fobiTitel: f.titel,
+        mitarbeiterId: m.id,
+        fobiId: f.id,
+        zustand: 'offen',
+        hinweis: 'Noch nie gemacht',
+      });
+      continue;
+    }
+    const faelligAb = status.zuletztBestandenAm + f.gueltigkeitMonate * MONAT_MS;
+    const bestandenDatum = new Date(status.zuletztBestandenAm).toLocaleDateString('de-DE');
+    if (Date.now() >= faelligAb) {
+      zeilen.push({
+        mitarbeiterName: m.name,
+        fobiTitel: f.titel,
+        mitarbeiterId: m.id,
+        fobiId: f.id,
+        zustand: 'faellig',
+        hinweis: `Zuletzt bestanden am ${bestandenDatum} — Auffrischung fällig`,
+      });
+    } else {
+      const faelligDatum = new Date(faelligAb).toLocaleDateString('de-DE');
+      zeilen.push({
+        mitarbeiterName: m.name,
+        fobiTitel: f.titel,
+        mitarbeiterId: m.id,
+        fobiId: f.id,
+        zustand: 'bestanden',
+        hinweis: `Bestanden am ${bestandenDatum} — fällig ab ${faelligDatum}`,
+      });
+    }
+  }
+}
+---
+
+<BaseLayout title="Pflicht-Fortbildungen" noindex>
+  <div class="container prose article">
+    <h1>Pflicht-Fortbildungen</h1>
+    <p class="lead muted">
+      Übersicht, wer welche Pflicht-Fortbildung absolviert hat, und Versand neuer Zugangslinks per
+      Mail. Der Test selbst läuft über einen persönlichen Link außerhalb des Mitarbeiter-Logins.
+    </p>
+
+    {ladeFehler && (
+      <div class="notice">
+        <strong>Status konnte nicht geladen werden.</strong>
+        <p style="margin-bottom:0">{ladeFehler}</p>
+      </div>
+    )}
+
+    <div class="tool-box">
+      <h2>Status</h2>
+      {zeilen.length === 0 ? (
+        <p class="small muted">
+          Noch keine Mitarbeiter oder Fortbildungen hinterlegt (<code>src/data/mitarbeiter.ts</code>,{' '}
+          <code>src/data/fortbildungen.ts</code>).
+        </p>
+      ) : (
+        <table class="status-tabelle">
+          <thead>
+            <tr>
+              <th>Mitarbeiter</th>
+              <th>Fortbildung</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {zeilen.map((z) => (
+              <tr>
+                <td>{z.mitarbeiterName}</td>
+                <td>{z.fobiTitel}</td>
+                <td>
+                  <span class={`badge badge-${z.zustand}`}>
+                    {z.zustand === 'bestanden' ? 'Aktuell' : z.zustand === 'faellig' ? 'Fällig' : 'Offen'}
+                  </span>
+                  <p class="small muted" style="margin:.25rem 0 0">{z.hinweis}</p>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+
+    <div class="tool-box">
+      <h2>Zugangslink senden</h2>
+      <p class="small muted" style="margin-top:0">
+        Verschickt einen persönlichen Test-Link per Mail. Die automatische Jahres-Erinnerung läuft
+        separat, dieses Formular ist für den Erstversand oder manuelles Nachschicken.
+      </p>
+      <form id="versand-form">
+        <div class="field">
+          <label for="mitarbeiterId">Mitarbeiter</label>
+          <select id="mitarbeiterId" name="mitarbeiterId" required>
+            {mitarbeiterListe.map((m) => (
+              <option value={m.id}>{m.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="field">
+          <label for="fobiId">Fortbildung</label>
+          <select id="fobiId" name="fobiId" required>
+            {fortbildungen.map((f) => (
+              <option value={f.id}>{f.titel}</option>
+            ))}
+          </select>
+        </div>
+        <button type="submit" class="btn">Link senden</button>
+      </form>
+      <p id="versand-ergebnis" class="small" hidden></p>
+    </div>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .tool-box h2 {
+    margin-top: 0;
+  }
+  .status-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .status-tabelle th,
+  .status-tabelle td {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  .badge-bestanden {
+    background: #2e7d32;
+    color: #fff;
+  }
+  .badge-faellig {
+    background: #b3261e;
+    color: #fff;
+  }
+  .badge-offen {
+    background: var(--color-surface);
+    color: inherit;
+  }
+</style>
+
+<script>
+  const form = document.getElementById('versand-form') as HTMLFormElement;
+  const ergebnis = document.getElementById('versand-ergebnis') as HTMLParagraphElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    submitBtn.disabled = true;
+    ergebnis.hidden = false;
+    ergebnis.textContent = 'Sende Link …';
+
+    const formData = new FormData(form);
+    try {
+      const res = await fetch('/mitarbeiter/fortbildungen/api/versand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mitarbeiterId: formData.get('mitarbeiterId'),
+          fobiId: formData.get('fobiId'),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        ergebnis.textContent = 'Link wurde per Mail verschickt.';
+      } else {
+        ergebnis.textContent = `Fehler beim Versand: ${data.detail ?? data.error ?? 'unbekannt'}`;
+      }
+    } catch (err) {
+      ergebnis.textContent = `Fehler beim Versand: ${err instanceof Error ? err.message : String(err)}`;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>

@@ -1,0 +1,130 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  sanitizeToken,
+  ladeToken,
+  findMitarbeiter,
+  findFortbildung,
+  fragenOhneLoesung,
+  verarbeiteEinreichung,
+} from '../../../lib/fortbildungen';
+
+const token = sanitizeToken(Astro.params.token);
+const eintrag = token ? await ladeToken(token) : null;
+const fobi = eintrag ? findFortbildung(eintrag.fobiId) : undefined;
+const mitarbeiter = eintrag ? findMitarbeiter(eintrag.mitarbeiterId) : undefined;
+
+let ergebnis: { bestanden: boolean; punkteProzent: number } | null = null;
+let fehler = '';
+
+if (token && eintrag && fobi && Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const antworten = fobi.fragen.map((_, i) => Number(form.get(`frage-${i}`) ?? -1));
+  const auswertung = await verarbeiteEinreichung(token, antworten);
+
+  if (auswertung.ok) {
+    ergebnis = { bestanden: auswertung.bestanden, punkteProzent: auswertung.punkteProzent };
+  } else if (auswertung.grund === 'bereits_bestanden') {
+    ergebnis = { bestanden: true, punkteProzent: eintrag.punkteProzent ?? 100 };
+  } else {
+    fehler = 'Dieser Link ist ungültig oder abgelaufen.';
+  }
+}
+---
+
+<BaseLayout title={fobi ? fobi.titel : 'Fortbildungs-Test'} noindex>
+  <div class="container prose article">
+    {!token || !eintrag || !fobi ? (
+      <>
+        <h1>Link ungültig</h1>
+        <p class="lead muted">
+          Dieser Fortbildungs-Link ist ungültig oder existiert nicht mehr. Bitte wende dich an
+          deine Ansprechperson für einen neuen Link.
+        </p>
+      </>
+    ) : eintrag.status === 'bestanden' && !ergebnis ? (
+      <>
+        <h1>{fobi.titel}</h1>
+        <p class="lead muted">
+          Du hast diese Fortbildung bereits am{' '}
+          {new Date(eintrag.bestandenAm ?? eintrag.erstelltAm).toLocaleDateString('de-DE')} erfolgreich
+          abgeschlossen ({eintrag.punkteProzent}% richtig). Ein neuer Link kommt automatisch, sobald
+          die nächste Auffrischung fällig ist.
+        </p>
+      </>
+    ) : ergebnis ? (
+      <>
+        <h1>{fobi.titel}</h1>
+        {ergebnis.bestanden ? (
+          <div class="notice notice-erfolg">
+            <strong>Bestanden!</strong>
+            <p style="margin-bottom:0">
+              {ergebnis.punkteProzent}% richtig beantwortet, für {mitarbeiter?.name ?? 'dich'} als
+              Nachweis gespeichert.
+            </p>
+          </div>
+        ) : (
+          <div class="notice">
+            <strong>Leider nicht bestanden.</strong>
+            <p style="margin-bottom:0">
+              {ergebnis.punkteProzent}% richtig, nötig sind {fobi.bestehensgrenzeProzent}%. Du kannst
+              es über denselben Link erneut versuchen.
+            </p>
+            <p style="margin-bottom:0"><a href={`/fortbildungen/test/${token}`}>Erneut versuchen</a></p>
+          </div>
+        )}
+      </>
+    ) : (
+      <>
+        <h1>{fobi.titel}</h1>
+        <p class="lead muted">{fobi.beschreibung}</p>
+        {fehler && <p class="error">{fehler}</p>}
+        <form method="POST" class="tool-box">
+          {fragenOhneLoesung(fobi).map((f, i) => (
+            <fieldset class="field">
+              <legend>{f.frage}</legend>
+              {f.antworten.map((antwort, j) => (
+                <label class="antwort-option">
+                  <input type="radio" name={`frage-${i}`} value={j} required />
+                  {antwort}
+                </label>
+              ))}
+            </fieldset>
+          ))}
+          <button type="submit" class="btn">Test abschließen</button>
+        </form>
+      </>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .antwort-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    font-weight: normal;
+  }
+  fieldset.field {
+    border: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+  }
+  legend {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    padding: 0;
+  }
+  .notice-erfolg {
+    border-color: #2e7d32;
+  }
+  .error {
+    color: #b3261e;
+  }
+</style>

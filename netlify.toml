@@ -6,3 +6,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Eigenständige Netlify Functions neben den vom Astro-Adapter erzeugten Functions – aktuell nur
+# die tägliche Fortbildungs-Erinnerung (netlify/functions/fortbildungen-erinnerung.mts).
+[functions]
+  directory = "netlify/functions"

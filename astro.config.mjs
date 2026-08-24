@@ -17,6 +17,8 @@ export default defineConfig({
       STAFF_SESSION_SECRET: envField.string({ context: 'server', access: 'secret' }),
       CLIENT_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret' }),
       CLIENT_SESSION_SECRET: envField.string({ context: 'server', access: 'secret' }),
+      // Für den Versand der Fortbildungs-Zugangslinks/-Erinnerungen, siehe src/lib/fortbildungen.ts
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret' }),
     },
   },
   markdown: {
