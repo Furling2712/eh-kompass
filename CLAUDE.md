@@ -43,21 +43,48 @@ Bei einer ersten Durchsicht des Codes aufgefallen, noch nicht angegangen:
 - Nur 4 Ratgeber-Artikel / 7 Glossar-Einträge — SPEC.md nennt 15–20 Seiten als Ziel vor
   AdSense-Antrag.
 
-## Pflicht-Fortbildungen mit Test + Jahres-Erinnerung (Stand 24.08.2026)
-Neue Funktion im Mitarbeiterbereich: `/mitarbeiter/fortbildungen` (Übersicht + Zugangslink-Versand)
-und `/fortbildungen/test/[token]` (Wissenstest, läuft bewusst getrennt vom normalen
-Mitarbeiter-Login über einen personalisierten Magic-Link-Token). Nachweise landen in Netlify Blobs
-(Store `fortbildungen`, siehe `src/lib/fortbildungen.ts`), eine tägliche Netlify Scheduled
-Function (`netlify/functions/fortbildungen-erinnerung.mts`) verschickt automatisch eine
+## Pflicht-Fortbildungen mit Test + Jahres-Erinnerung (Stand 27.08.2026)
+Funktion im Mitarbeiterbereich: `/mitarbeiter/fortbildungen` (Admin-Gesamtübersicht +
+Zugangslink-Versand) und `/fortbildungen/test/[token]` (Wissenstest, läuft bewusst getrennt vom
+normalen Mitarbeiter-Login über einen personalisierten Magic-Link-Token). Nachweise landen in
+Netlify Blobs (Store `fortbildungen`, siehe `src/lib/fortbildungen.ts`), eine tägliche Netlify
+Scheduled Function (`netlify/functions/fortbildungen-erinnerung.mts`) verschickt automatisch eine
 Erinnerungsmail, sobald eine Fortbildung >12 Monate (konfigurierbar pro Fortbildung) zurückliegt.
-Mailversand über Resend.
+Mailversand über Resend. `src/data/fortbildungen.ts` ist mit 3 echten Fortbildungen befüllt
+(Datenschutzunterweisung, Arbeitssicherheit, KI-Schulung, je 10 Fragen).
+
+**Admin/Mitarbeiter-Trennung (27.08., DSGVO-Fix):** Die Gesamtübersicht unter
+`/mitarbeiter/fortbildungen` zeigte bis eben den Fortbildungsstand ALLER Mitarbeiter:innen für
+jede Person mit dem geteilten Mitarbeiter-Passwort sichtbar — personenbezogene Daten, kein
+Need-to-know. Jetzt eigenes Admin-Passwort (`ADMIN_PASSWORD_HASH`/`ADMIN_SESSION_SECRET`,
+`src/lib/auth.ts`, eigene Middleware-Route in `src/middleware.ts`, Login unter
+`/mitarbeiter/fortbildungen/login`), komplett getrennt vom normalen Mitarbeiter-Login. Für den
+eigenen Stand gibt es stattdessen einen persönlichen, tokenbasierten Link
+(`/fortbildungen/status/[token]`, `STATUS_LINK_SECRET`, deterministisch per HMAC aus der
+Mitarbeiter-ID abgeleitet, kein Login nötig) — kommt automatisch mit jeder Zugangs-/Erinnerungsmail
+und ist zusätzlich in der Admin-Übersicht zum manuellen Weitergeben gelistet. Admin-Passwort wurde
+automatisch generiert und Alex im Chat mitgeteilt; kann jederzeit mit `npm run admin:hash` neu
+gesetzt werden.
+
+**Fälligkeits-Bug behoben (27.08.):** Die Fälligkeitsberechnung rechnete mit `gueltigkeitMonate *
+30 Tagen` statt echten Kalendermonaten — bei 12 Monaten Gültigkeit wurde jede Fortbildung ca. 5
+Tage zu früh fällig (360 statt ~365 Tage). Jetzt zentral in `faelligkeitsDatum()`
+(`src/lib/fortbildungen.ts`, nutzt `Date.setMonth`), an beiden Stellen (Admin-Übersicht,
+Erinnerungs-Function) verwendet statt dupliziert.
 
 **Vor dem echten Einsatz noch offen (kann ich nicht für Alex erledigen):**
 - Resend-Account anlegen, Domain `eh-kompass.de` per DNS verifizieren, `RESEND_API_KEY` in den
-  Netlify-Site-Settings + lokal in `.env` hinterlegen (aktuell nur Platzhalter in `.env`)
-- `src/data/mitarbeiter.ts` mit echten Namen/Mailadressen befüllen (aktuell nur 1 Platzhaltereintrag)
-- `src/data/fortbildungen.ts` mit den echten Fortbildungstiteln/-fragen befüllen (aktuell nur ein
-  Beispiel "Brandschutz-Unterweisung" mit 2 Platzhalterfragen)
+  Netlify-Site-Settings + lokal in `.env` hinterlegen (Stand 26.08.: `.env` enthielt weiterhin nur
+  einen Platzhalter, echter Versand schlug mit 401 "API key is invalid" fehl). Als Übergangslösung
+  läuft `ABSENDER` in `src/lib/fortbildungen.ts` aktuell auf Resends Testdomain
+  `onboarding@resend.dev` statt `fortbildungen@eh-kompass.de` — funktioniert ohne DNS-Verifizierung,
+  liefert aber nur an die Mailadresse des Resend-Account-Inhabers (alexander.radler@ptv-euregio.de)
+  aus. Sobald ein echter `RESEND_API_KEY` gesetzt UND die Domain verifiziert ist: `ABSENDER` zurück
+  auf `fortbildungen@eh-kompass.de` stellen.
+- `src/data/mitarbeiter.ts` mit echten Namen/Mailadressen der Kolleg:innen befüllen (aktuell nur
+  Alex selbst eingetragen)
+- Vor Deploy: `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET`, `STATUS_LINK_SECRET` (zusätzlich zu
+  den bestehenden Secrets) auch in den Netlify-Site-Settings hinterlegen, nicht nur lokal in `.env`
 - Nach dem ersten Deploy prüfen, ob die Scheduled Function in Netlify als "Scheduled" gelistet ist
 
 ## Laufendes Thema: Neue Shop-Produkte aus der Schreinerei (Stand 21.07.2026)

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { RESEND_API_KEY } from 'astro:env/server';
+import { RESEND_API_KEY, STATUS_LINK_SECRET } from 'astro:env/server';
 import { erstelleZugang, sendeZugangsMail } from '../../../../lib/fortbildungen';
 
 export const prerender = false;
@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const { token, mitarbeiter, fobi } = await erstelleZugang(mitarbeiterId, fobiId);
-    await sendeZugangsMail(RESEND_API_KEY, mitarbeiter, fobi, token);
+    await sendeZugangsMail(RESEND_API_KEY, mitarbeiter, fobi, token, STATUS_LINK_SECRET);
     return new Response(JSON.stringify({ ok: true }), {
       headers: { 'Content-Type': 'application/json' },
     });

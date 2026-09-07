@@ -58,7 +58,7 @@ hängen vom Einzelfall ab – dazu berät dich der Kostenträger oder eine unabh
 ## Die wichtigsten Begriffe
 
 Viele Abkürzungen begegnen dir immer wieder. Die wichtigsten erklären wir kurz und verständlich in
-unserem [Glossar](/glossar/) – von **ICF** über **BEI** bis **Teilhabe**.
+unserem [Wörterbuch](/glossar/) – von **ICF** über **BEI** bis **Teilhabe**.
 
 ## Nächste Schritte
 

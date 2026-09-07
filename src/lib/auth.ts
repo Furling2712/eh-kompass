@@ -4,6 +4,8 @@ import {
   STAFF_SESSION_SECRET,
   CLIENT_PASSWORD_HASH,
   CLIENT_SESSION_SECRET,
+  ADMIN_PASSWORD_HASH,
+  ADMIN_SESSION_SECRET,
 } from 'astro:env/server';
 
 // Aktuell: ein gemeinsames Passwort für alle Mitarbeiter (kein Nutzer-Datensatz nötig).
@@ -92,6 +94,27 @@ export function createClientSessionCookieValue(): string {
 
 export function verifyClientSessionCookieValue(value: string | undefined): boolean {
   return verifySignedSessionCookieValue(value, CLIENT_SESSION_SECRET);
+}
+
+// --- Admin-Bereich für die Fortbildungs-Gesamtübersicht (/mitarbeiter/fortbildungen) ---
+// Eigenes, separates Passwort – bewusst getrennt vom allgemeinen Mitarbeiter-Passwort oben, damit
+// nicht jede Person mit dem geteilten Mitarbeiter-Login die Fortbildungs-Nachweise aller
+// Kolleg:innen einsehen kann (personenbezogene Daten). Mitarbeiter:innen sehen ihren eigenen
+// Stand stattdessen über einen persönlichen Link, siehe `mitarbeiterStatusToken` in
+// src/lib/fortbildungen.ts.
+
+export const ADMIN_COOKIE_NAME = 'fobi_admin_session';
+
+export function verifyAdminPassword(password: string): boolean {
+  return verifyPasswordAgainstHash(password, ADMIN_PASSWORD_HASH);
+}
+
+export function createAdminSessionCookieValue(): string {
+  return createSignedSessionCookieValue(ADMIN_SESSION_SECRET);
+}
+
+export function verifyAdminSessionCookieValue(value: string | undefined): boolean {
+  return verifySignedSessionCookieValue(value, ADMIN_SESSION_SECRET);
 }
 
 export { SESSION_TTL_SECONDS };

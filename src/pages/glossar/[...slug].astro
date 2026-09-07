@@ -19,9 +19,9 @@ const fmt = (date: Date) =>
   new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
 ---
 
-<BaseLayout title={`${d.term} — Glossar`} description={d.description}>
+<BaseLayout title={`${d.term} — Wörterbuch`} description={d.description}>
   <article class="container prose article">
-    <a href="/glossar/" class="small back-link">← Zurück zum Glossar</a>
+    <a href="/glossar/" class="small back-link">← Zurück zum Wörterbuch</a>
     <h1>{d.title}</h1>
     <p class="lead muted">{d.description}</p>
     <div class="article-body">

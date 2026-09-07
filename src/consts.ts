@@ -7,11 +7,11 @@ export const SITE_DESCRIPTION =
 // Hauptnavigation
 export const NAV_LINKS = [
   { href: '/ratgeber/', label: 'Ratgeber' },
-  { href: '/glossar/', label: 'Glossar' },
   { href: '/tools/', label: 'Tools' },
   { href: '/notfallzimmer/', label: 'Notfallzimmer' },
-  { href: '/bewo-anbieter/', label: 'Für andere BeWo-Anbieter' },
+  { href: '/glossar/', label: 'Wörterbuch' },
   { href: '/online-bewo/', label: 'Online-BeWo' },
+  { href: '/bewo-anbieter/', label: 'Für andere BeWo-Anbieter' },
   { href: '/impressum', label: 'Impressum' },
 ];
 

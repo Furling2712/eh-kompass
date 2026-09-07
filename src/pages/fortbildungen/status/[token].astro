@@ -1,0 +1,134 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { STATUS_LINK_SECRET } from 'astro:env/server';
+import { fortbildungen } from '../../../data/fortbildungen';
+import {
+  findMitarbeiterByStatusToken,
+  ladeStatusFuerMitarbeiter,
+  faelligkeitsDatum,
+} from '../../../lib/fortbildungen';
+
+const rawToken = Astro.params.token ?? '';
+const gueltigesFormat = /^[A-Za-z0-9_-]{24}$/.test(rawToken);
+const mitarbeiter = gueltigesFormat ? findMitarbeiterByStatusToken(rawToken, STATUS_LINK_SECRET) : undefined;
+
+interface Zeile {
+  fobiTitel: string;
+  zustand: 'offen' | 'bestanden' | 'faellig';
+  hinweis: string;
+}
+
+let zeilen: Zeile[] = [];
+let ladeFehler = '';
+
+if (mitarbeiter) {
+  try {
+    const status = await ladeStatusFuerMitarbeiter(mitarbeiter.id);
+    const statusMap = new Map(status.map((s) => [s.fobiId, s]));
+
+    zeilen = fortbildungen.map((f) => {
+      const s = statusMap.get(f.id);
+      if (!s) {
+        return { fobiTitel: f.titel, zustand: 'offen' as const, hinweis: 'Noch nie gemacht' };
+      }
+      const faelligAb = faelligkeitsDatum(s.zuletztBestandenAm, f.gueltigkeitMonate);
+      const bestandenDatum = new Date(s.zuletztBestandenAm).toLocaleDateString('de-DE');
+      if (Date.now() >= faelligAb) {
+        return {
+          fobiTitel: f.titel,
+          zustand: 'faellig' as const,
+          hinweis: `Zuletzt bestanden am ${bestandenDatum} — Auffrischung fällig`,
+        };
+      }
+      const faelligDatum = new Date(faelligAb).toLocaleDateString('de-DE');
+      return {
+        fobiTitel: f.titel,
+        zustand: 'bestanden' as const,
+        hinweis: `Bestanden am ${bestandenDatum} — fällig ab ${faelligDatum}`,
+      };
+    });
+  } catch (err) {
+    ladeFehler = err instanceof Error ? err.message : String(err);
+  }
+}
+---
+
+<BaseLayout title="Meine Fortbildungen" noindex>
+  <div class="container prose article">
+    {!mitarbeiter ? (
+      <>
+        <h1>Link ungültig</h1>
+        <p class="lead muted">
+          Dieser Link ist ungültig oder existiert nicht mehr. Bitte wende dich an deine
+          Ansprechperson für einen neuen Link.
+        </p>
+      </>
+    ) : (
+      <>
+        <h1>Meine Pflicht-Fortbildungen</h1>
+        <p class="lead muted">Persönlicher Stand für {mitarbeiter.name}.</p>
+
+        {ladeFehler && (
+          <div class="notice">
+            <strong>Status konnte nicht geladen werden.</strong>
+            <p style="margin-bottom:0">{ladeFehler}</p>
+          </div>
+        )}
+
+        <table class="status-tabelle">
+          <thead>
+            <tr>
+              <th>Fortbildung</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {zeilen.map((z) => (
+              <tr>
+                <td>{z.fobiTitel}</td>
+                <td>
+                  <span class={`badge badge-${z.zustand}`}>
+                    {z.zustand === 'bestanden' ? 'Aktuell' : z.zustand === 'faellig' ? 'Fällig' : 'Offen'}
+                  </span>
+                  <p class="small muted" style="margin:.25rem 0 0">{z.hinweis}</p>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+  .status-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+  }
+  .status-tabelle th,
+  .status-tabelle td {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  .badge-bestanden {
+    background: #2e7d32;
+    color: #fff;
+  }
+  .badge-faellig {
+    background: #b3261e;
+    color: #fff;
+  }
+  .badge-offen {
+    background: var(--color-surface);
+    color: inherit;
+  }
+</style>

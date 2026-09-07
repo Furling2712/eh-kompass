@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHmac } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 import { mitarbeiterListe, type MitarbeiterEintrag } from '../data/mitarbeiter';
 import { fortbildungen, type Fortbildung } from '../data/fortbildungen';
@@ -6,8 +6,13 @@ import { fortbildungen, type Fortbildung } from '../data/fortbildungen';
 // Basis-URL für die Magic-Links in den Mails. Muss zur `site`-Angabe in astro.config.mjs passen.
 const SITE_URL = 'https://eh-kompass.de';
 
-// Absenderadresse für die Fortbildungs-Mails. Muss in Resend als verifizierte Domain hinterlegt sein.
-const ABSENDER = 'EH-Kompass Fortbildungen <fortbildungen@eh-kompass.de>';
+// Absenderadresse für die Fortbildungs-Mails.
+// TEMPORÄR: bis eh-kompass.de bei Resend per DNS verifiziert ist, läuft der Versand über
+// Resends eigene Testdomain onboarding@resend.dev. Die funktioniert ohne Verifizierung, kann
+// aber NUR an die Mailadresse zustellen, mit der der Resend-Account registriert ist
+// (aktuell alexander.radler@ptv-euregio.de). Sobald die Domain verifiziert ist: zurück auf
+// 'EH-Kompass Fortbildungen <fortbildungen@eh-kompass.de>' stellen.
+const ABSENDER = 'EH-Kompass Fortbildungen <onboarding@resend.dev>';
 
 // Diese Datei wird auch von netlify/functions/fortbildungen-erinnerung.mts importiert – einer
 // eigenständigen Netlify Function außerhalb des Astro-Builds, die `astro:env/server` nicht
@@ -64,6 +69,36 @@ export function findFortbildung(id: string): Fortbildung | undefined {
   return fortbildungen.find((f) => f.id === id);
 }
 
+/**
+ * Datum, ab dem eine Fortbildung nach `gueltigkeitMonate` erneut fällig wird. Rechnet in echten
+ * Kalendermonaten (nicht mit einer 30-Tage-Näherung) – sonst wird bei 12 Monaten Gültigkeit jede
+ * Fortbildung ca. 5 Tage zu früh fällig (12 × 30 = 360 statt ~365 Tage).
+ */
+export function faelligkeitsDatum(zuletztBestandenAm: number, gueltigkeitMonate: number): number {
+  const datum = new Date(zuletztBestandenAm);
+  datum.setMonth(datum.getMonth() + gueltigkeitMonate);
+  return datum.getTime();
+}
+
+/**
+ * Persönlicher, nicht ratebarer Token je Mitarbeiter:in für die eigene Status-Ansicht
+ * (/fortbildungen/status/[token]) – bewusst getrennt vom Mitarbeiter-Login, damit jede Person nur
+ * ihren eigenen Stand sieht, ohne sich extra einzuloggen. Deterministisch aus der Mitarbeiter-ID
+ * abgeleitet (HMAC mit STATUS_LINK_SECRET), daher kein eigener Speicher nötig – der Link bleibt
+ * stabil und lässt sich bei Bedarf jederzeit erneut aus der Admin-Übersicht ablesen.
+ */
+export function mitarbeiterStatusToken(mitarbeiterId: string, secret: string): string {
+  return createHmac('sha256', secret).update(mitarbeiterId).digest('base64url').slice(0, 24);
+}
+
+export function findMitarbeiterByStatusToken(token: string, secret: string): MitarbeiterEintrag | undefined {
+  return mitarbeiterListe.find((m) => mitarbeiterStatusToken(m.id, secret) === token);
+}
+
+export function statusLink(mitarbeiterId: string, secret: string): string {
+  return `${SITE_URL}/fortbildungen/status/${mitarbeiterStatusToken(mitarbeiterId, secret)}`;
+}
+
 async function sendeMail(apiKey: string, an: string, betreff: string, html: string): Promise<void> {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -111,9 +146,11 @@ export async function sendeZugangsMail(
   apiKey: string,
   mitarbeiter: MitarbeiterEintrag,
   fobi: Fortbildung,
-  token: string
+  token: string,
+  statusLinkSecret: string
 ): Promise<void> {
   const link = testLink(token);
+  const eigenerStatus = statusLink(mitarbeiter.id, statusLinkSecret);
   await sendeMail(
     apiKey,
     mitarbeiter.email,
@@ -121,7 +158,8 @@ export async function sendeZugangsMail(
     `<p>Hallo ${mitarbeiter.name},</p>
      <p>für dich steht die Pflicht-Fortbildung „${fobi.titel}“ an. Über den folgenden Link kommst du direkt zum Test:</p>
      <p><a href="${link}">${link}</a></p>
-     <p>${fobi.beschreibung}</p>`
+     <p>${fobi.beschreibung}</p>
+     <p style="margin-top:1.5em;font-size:0.9em;color:#555">Deinen persönlichen Stand bei allen Pflicht-Fortbildungen kannst du jederzeit über diesen Link einsehen: <a href="${eigenerStatus}">${eigenerStatus}</a></p>`
   );
 }
 
@@ -129,9 +167,11 @@ export async function sendeErinnerungsMail(
   apiKey: string,
   mitarbeiter: MitarbeiterEintrag,
   fobi: Fortbildung,
-  token: string
+  token: string,
+  statusLinkSecret: string
 ): Promise<void> {
   const link = testLink(token);
+  const eigenerStatus = statusLink(mitarbeiter.id, statusLinkSecret);
   await sendeMail(
     apiKey,
     mitarbeiter.email,
@@ -139,7 +179,8 @@ export async function sendeErinnerungsMail(
     `<p>Hallo ${mitarbeiter.name},</p>
      <p>deine Pflicht-Fortbildung „${fobi.titel}“ liegt jetzt ${fobi.gueltigkeitMonate} Monate zurück und muss aufgefrischt werden.</p>
      <p>Über den folgenden Link kommst du direkt zum Test:</p>
-     <p><a href="${link}">${link}</a></p>`
+     <p><a href="${link}">${link}</a></p>
+     <p style="margin-top:1.5em;font-size:0.9em;color:#555">Deinen persönlichen Stand bei allen Pflicht-Fortbildungen kannst du jederzeit über diesen Link einsehen: <a href="${eigenerStatus}">${eigenerStatus}</a></p>`
   );
 }
 
@@ -208,7 +249,7 @@ export async function ermittleFaelligeFaelle(): Promise<StatusEintrag[]> {
     const fobi = findFortbildung(status.fobiId);
     if (!fobi) continue;
 
-    const faelligAb = status.zuletztBestandenAm + fobi.gueltigkeitMonate * 30 * 24 * 60 * 60 * 1000;
+    const faelligAb = faelligkeitsDatum(status.zuletztBestandenAm, fobi.gueltigkeitMonate);
     const schonErinnert = status.erinnertAm !== null && status.erinnertAm > status.zuletztBestandenAm;
 
     if (jetzt >= faelligAb && !schonErinnert) {
@@ -231,6 +272,17 @@ export async function ladeAlleStatus(): Promise<StatusEintrag[]> {
   const ergebnisse: StatusEintrag[] = [];
   for (const blob of blobs) {
     const status = (await store.get(blob.key, { type: 'json' })) as StatusEintrag | null;
+    if (status) ergebnisse.push(status);
+  }
+  return ergebnisse;
+}
+
+/** Status nur für eine einzelne Mitarbeiter:in, für die persönliche Status-Seite. */
+export async function ladeStatusFuerMitarbeiter(mitarbeiterId: string): Promise<StatusEintrag[]> {
+  const store = getFortbildungenStore();
+  const ergebnisse: StatusEintrag[] = [];
+  for (const f of fortbildungen) {
+    const status = (await store.get(statusKey(mitarbeiterId, f.id), { type: 'json' })) as StatusEintrag | null;
     if (status) ergebnisse.push(status);
   }
   return ergebnisse;

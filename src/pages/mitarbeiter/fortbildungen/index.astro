@@ -2,11 +2,10 @@
 export const prerender = false;
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { STATUS_LINK_SECRET } from 'astro:env/server';
 import { mitarbeiterListe } from '../../../data/mitarbeiter';
 import { fortbildungen } from '../../../data/fortbildungen';
-import { ladeAlleStatus, type StatusEintrag } from '../../../lib/fortbildungen';
-
-const MONAT_MS = 30 * 24 * 60 * 60 * 1000;
+import { ladeAlleStatus, faelligkeitsDatum, statusLink, type StatusEintrag } from '../../../lib/fortbildungen';
 
 let alleStatus: StatusEintrag[] = [];
 let ladeFehler = '';
@@ -42,7 +41,7 @@ for (const m of mitarbeiterListe) {
       });
       continue;
     }
-    const faelligAb = status.zuletztBestandenAm + f.gueltigkeitMonate * MONAT_MS;
+    const faelligAb = faelligkeitsDatum(status.zuletztBestandenAm, f.gueltigkeitMonate);
     const bestandenDatum = new Date(status.zuletztBestandenAm).toLocaleDateString('de-DE');
     if (Date.now() >= faelligAb) {
       zeilen.push({
@@ -66,6 +65,17 @@ for (const m of mitarbeiterListe) {
     }
   }
 }
+
+// Dringendste zuerst: fällig (überfällig) vor offen (nie gemacht) vor bestanden (aktuell).
+const ZUSTAND_PRIORITAET: Record<Zeile['zustand'], number> = { faellig: 0, offen: 1, bestanden: 2 };
+zeilen.sort((a, b) => {
+  const prio = ZUSTAND_PRIORITAET[a.zustand] - ZUSTAND_PRIORITAET[b.zustand];
+  return prio !== 0 ? prio : a.mitarbeiterName.localeCompare(b.mitarbeiterName, 'de');
+});
+
+const anzahlOffen = zeilen.filter((z) => z.zustand === 'offen').length;
+const anzahlFaellig = zeilen.filter((z) => z.zustand === 'faellig').length;
+const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
 ---
 
 <BaseLayout title="Pflicht-Fortbildungen" noindex>
@@ -73,7 +83,9 @@ for (const m of mitarbeiterListe) {
     <h1>Pflicht-Fortbildungen</h1>
     <p class="lead muted">
       Übersicht, wer welche Pflicht-Fortbildung absolviert hat, und Versand neuer Zugangslinks per
-      Mail. Der Test selbst läuft über einen persönlichen Link außerhalb des Mitarbeiter-Logins.
+      Mail. Admin-Bereich mit eigenem Passwort, getrennt vom normalen Mitarbeiter-Login – so sieht
+      nicht jede Person mit dem geteilten Mitarbeiter-Passwort die Nachweise aller Kolleg:innen.
+      Der Test selbst läuft über einen persönlichen Link außerhalb des Mitarbeiter-Logins.
     </p>
 
     {ladeFehler && (
@@ -84,7 +96,19 @@ for (const m of mitarbeiterListe) {
     )}
 
     <div class="tool-box">
-      <h2>Status</h2>
+      <div class="status-head">
+        <h2>Status</h2>
+        {zeilen.length > 0 && (
+          <button type="button" id="csv-export" class="btn btn-secondary">Als CSV exportieren</button>
+        )}
+      </div>
+      {zeilen.length > 0 && (
+        <p class="small muted status-summary">
+          <strong>{anzahlFaellig + anzahlOffen}</strong> von {zeilen.length} brauchen Aktion
+          ({anzahlFaellig} fällig zur Auffrischung, {anzahlOffen} noch nie gemacht) ·{' '}
+          {anzahlAktuell} aktuell
+        </p>
+      )}
       {zeilen.length === 0 ? (
         <p class="small muted">
           Noch keine Mitarbeiter oder Fortbildungen hinterlegt (<code>src/data/mitarbeiter.ts</code>,{' '}
@@ -145,7 +169,35 @@ for (const m of mitarbeiterListe) {
       <p id="versand-ergebnis" class="small" hidden></p>
     </div>
 
-    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+    <div class="tool-box">
+      <h2>Persönliche Status-Links</h2>
+      <p class="small muted" style="margin-top:0">
+        Jede Mitarbeiter:in bekommt ihren eigenen Link automatisch mit jeder Zugangs-/Erinnerungsmail
+        zugeschickt. Hier zum manuellen Weitergeben (z. B. beim Onboarding), ohne diese Übersicht zu
+        teilen.
+      </p>
+      <ul class="status-link-liste">
+        {mitarbeiterListe.map((m) => (
+          <li>
+            <span class="status-link-name">{m.name}</span>
+            <input
+              type="text"
+              readonly
+              value={statusLink(m.id, STATUS_LINK_SECRET)}
+              onclick="this.select()"
+              class="status-link-feld"
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <p>
+      <a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a>
+    </p>
+    <form method="POST" action="/mitarbeiter/fortbildungen/logout">
+      <button type="submit" class="btn btn-secondary">Admin abmelden</button>
+    </form>
   </div>
 </BaseLayout>
 
@@ -155,6 +207,20 @@ for (const m of mitarbeiterListe) {
   }
   .tool-box h2 {
     margin-top: 0;
+  }
+  .status-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  .status-head h2 {
+    margin-bottom: 0;
+  }
+  .status-summary {
+    margin: 0 0 1.25rem;
   }
   .status-tabelle {
     width: 100%;
@@ -178,6 +244,34 @@ for (const m of mitarbeiterListe) {
   .badge-offen {
     background: var(--color-surface);
     color: inherit;
+  }
+  .status-link-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .status-link-liste li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .status-link-name {
+    font-weight: 600;
+    min-width: 10rem;
+  }
+  .status-link-feld {
+    flex: 1 1 16rem;
+    min-width: 0;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-family: monospace;
+    background: var(--color-surface);
   }
 </style>
 
@@ -214,4 +308,30 @@ for (const m of mitarbeiterListe) {
       submitBtn.disabled = false;
     }
   });
+
+  const csvBtn = document.getElementById('csv-export');
+  if (csvBtn) {
+    csvBtn.addEventListener('click', () => {
+      const rows = Array.from(document.querySelectorAll('.status-tabelle tbody tr'));
+      const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+      const zeilen = rows.map((row) => {
+        const cells = row.querySelectorAll('td');
+        const mitarbeiter = cells[0]?.textContent?.trim() ?? '';
+        const fobi = cells[1]?.textContent?.trim() ?? '';
+        const badge = cells[2]?.querySelector('.badge')?.textContent?.trim() ?? '';
+        const hinweis = cells[2]?.querySelector('p')?.textContent?.trim() ?? '';
+        return [mitarbeiter, fobi, badge, hinweis].map(escape).join(';');
+      });
+      const csv = '\uFEFF' + ['Mitarbeiter;Fortbildung;Status;Hinweis', ...zeilen].join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fobi-status-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+  }
 </script>

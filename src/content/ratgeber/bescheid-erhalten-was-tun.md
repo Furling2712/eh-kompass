@@ -30,6 +30,10 @@ Suche gezielt nach diesen Punkten:
 - **Ab wann und wie lange** gilt die Entscheidung?
 - **Die Begründung:** Warum wurde so entschieden?
 
+> **Tipp:** Stehen Formulierungen drin, mit denen du nichts anfangen kannst (z. B. „Anhörung“,
+> „Ermessen“, „Aufhebung“)? Unser [Bescheid-Übersetzer](/tools/bescheid-uebersetzer) erklärt die
+> häufigsten Behörden-Begriffe in einfacher Sprache – Foto reicht, läuft komplett im Browser.
+
 ## Schritt 3: Die Rechtsbehelfsbelehrung finden
 
 Am Ende des Bescheids steht meist ein Abschnitt „Rechtsbehelfsbelehrung“. Dort erfährst du,

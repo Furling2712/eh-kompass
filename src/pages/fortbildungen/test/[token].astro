@@ -81,19 +81,24 @@ if (token && eintrag && fobi && Astro.request.method === 'POST') {
         <h1>{fobi.titel}</h1>
         <p class="lead muted">{fobi.beschreibung}</p>
         {fehler && <p class="error">{fehler}</p>}
-        <form method="POST" class="tool-box">
+        <form method="POST" class="fobi-form">
           {fragenOhneLoesung(fobi).map((f, i) => (
-            <fieldset class="field">
-              <legend>{f.frage}</legend>
-              {f.antworten.map((antwort, j) => (
-                <label class="antwort-option">
-                  <input type="radio" name={`frage-${i}`} value={j} required />
-                  {antwort}
-                </label>
-              ))}
+            <fieldset class="frage-card">
+              <legend>
+                <span class="frage-index">Frage {i + 1} von {fobi.fragen.length}</span>
+                {f.frage}
+              </legend>
+              <div class="antworten">
+                {f.antworten.map((antwort, j) => (
+                  <label class="antwort-option">
+                    <input type="radio" name={`frage-${i}`} value={j} required />
+                    <span>{antwort}</span>
+                  </label>
+                ))}
+              </div>
             </fieldset>
           ))}
-          <button type="submit" class="btn">Test abschließen</button>
+          <button type="submit" class="btn btn-submit">Test abschließen</button>
         </form>
       </>
     )}
@@ -104,23 +109,85 @@ if (token && eintrag && fobi && Astro.request.method === 'POST') {
   .article {
     padding-block: 2.5rem 1rem;
   }
+
+  .fobi-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin-top: 1.5rem;
+  }
+
+  .frage-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.6rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .frage-card legend {
+    padding: 0;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+  }
+
+  .frage-index {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .antworten {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
   .antwort-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0;
-    font-weight: normal;
+    gap: 0.75rem;
+    font-weight: 400;
+    background: #fff;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin: 0;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
-  fieldset.field {
-    border: none;
-    padding: 0;
-    margin: 0 0 1.25rem;
+
+  .antwort-option:hover {
+    border-color: var(--color-primary);
+    background: var(--color-accent);
   }
-  legend {
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-    padding: 0;
+
+  .antwort-option:has(input:checked) {
+    border-color: var(--color-primary);
+    background: var(--color-accent);
   }
+
+  .antwort-option input {
+    width: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    accent-color: var(--color-primary);
+    margin: 0;
+  }
+
+  .btn-submit {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+  }
+
   .notice-erfolg {
     border-color: #2e7d32;
   }

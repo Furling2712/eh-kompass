@@ -1,0 +1,73 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  ADMIN_COOKIE_NAME,
+  SESSION_TTL_SECONDS,
+  createAdminSessionCookieValue,
+  verifyAdminPassword,
+} from '../../../lib/auth';
+
+const next = Astro.url.searchParams.get('next') ?? '/mitarbeiter/fortbildungen/';
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const password = String(form.get('password') ?? '');
+
+  if (verifyAdminPassword(password)) {
+    Astro.cookies.set(ADMIN_COOKIE_NAME, createAdminSessionCookieValue(), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: import.meta.env.PROD,
+      path: '/',
+      maxAge: SESSION_TTL_SECONDS,
+    });
+    return Astro.redirect(next);
+  }
+
+  error = 'Falsches Passwort.';
+}
+---
+
+<BaseLayout title="Fortbildungen – Admin-Login" noindex>
+  <div class="container prose article">
+    <h1>Fortbildungen – Admin-Login</h1>
+    <p class="lead muted">
+      Gesamtübersicht aller Mitarbeiter:innen. Eigenes Passwort, bewusst getrennt vom normalen
+      Mitarbeiter-Login. Für den eigenen Fortbildungsstand gibt es für jede Mitarbeiter:in einen
+      persönlichen Link (kommt automatisch mit jeder Zugangs-/Erinnerungsmail).
+    </p>
+
+    <form method="POST" class="login-form">
+      <label for="password">Admin-Passwort</label>
+      <input type="password" id="password" name="password" required autofocus />
+      <button type="submit" class="btn">Anmelden</button>
+      {error && <p class="error">{error}</p>}
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+    max-width: 24rem;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .login-form input {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+  .error {
+    color: #b3261e;
+    margin: 0;
+  }
+</style>
