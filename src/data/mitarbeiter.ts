@@ -15,5 +15,12 @@ export const mitarbeiterListe: MitarbeiterEintrag[] = [
     name: 'Alexander Radler',
     email: 'alexander.radler@ptv-euregio.de',
   },
+  // Beispiel-Eintrag nur zu Demo-Zwecken (z. B. beim Vorführen der Status-Übersicht) –
+  // vor dem echten Go-Live wieder entfernen oder durch echte Kolleg:innen ersetzen.
+  {
+    id: 'beispiel-mitarbeiter',
+    name: 'Max Mustermann (Beispiel)',
+    email: 'max.mustermann@ptv-euregio.de',
+  },
   // TODO: weitere Mitarbeiter:innen eintragen
 ];

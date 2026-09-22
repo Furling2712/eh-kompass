@@ -3,24 +3,32 @@ export const prerender = false;
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
-// TODO: echten Link zum Nextcloud-Dashboard eintragen.
-const NEXTCLOUD_URL = '#';
+// TODO: Video-Link eintragen, sobald vorhanden.
+const VIDEO_URL = '';
 ---
 
-<BaseLayout title="Nextcloud (Dashboard)" noindex>
+<BaseLayout title="Nextcloud-Erklärvideo" noindex>
   <div class="container prose article">
-    <h1>Nextcloud (Dashboard)</h1>
-    <p class="lead muted">Zugang zum Nextcloud-Dashboard.</p>
+    <h1>Nextcloud-Erklärvideo</h1>
+    <p class="lead muted">Kurzes Video zur Einrichtung und Nutzung von Nextcloud.</p>
 
-    <div class="notice">
-      <strong>Platzhalter</strong>
-      <p style="margin-bottom:0">
-        Trag den echten Link in <code>src/pages/mitarbeiter/nextcloud/index.astro</code>
-        (Variable <code>NEXTCLOUD_URL</code>) ein.
-      </p>
-    </div>
-
-    <p><a href={NEXTCLOUD_URL} class="btn" target="_blank" rel="noopener">Zur Nextcloud →</a></p>
+    {
+      VIDEO_URL ? (
+        <p>
+          <a href={VIDEO_URL} target="_blank" rel="noopener" class="btn">
+            Video ansehen ↗
+          </a>
+        </p>
+      ) : (
+        <div class="notice">
+          <strong>Video folgt in Kürze</strong>
+          <p style="margin-bottom:0">
+            Trag den Link in <code>src/pages/mitarbeiter/nextcloud/index.astro</code> (Variable
+            <code>VIDEO_URL</code>) ein, sobald das Video fertig ist.
+          </p>
+        </div>
+      )
+    }
 
     <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
   </div>

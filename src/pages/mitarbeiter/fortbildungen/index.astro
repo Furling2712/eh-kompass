@@ -17,187 +17,233 @@ try {
 
 const statusMap = new Map(alleStatus.map((s) => [`${s.mitarbeiterId}:${s.fobiId}`, s]));
 
-interface Zeile {
-  mitarbeiterName: string;
-  fobiTitel: string;
-  mitarbeiterId: string;
+interface Zelle {
   fobiId: string;
+  fobiTitel: string;
   zustand: 'offen' | 'bestanden' | 'faellig';
-  hinweis: string;
+  tooltip: string;
+  faelligAb: number | null;
 }
 
-const zeilen: Zeile[] = [];
-for (const m of mitarbeiterListe) {
-  for (const f of fortbildungen) {
+interface MitarbeiterZeile {
+  mitarbeiterId: string;
+  name: string;
+  zellen: Zelle[];
+  naechsteAuffrischung: { datum: number; ueberfaellig: boolean; fobiTitel: string } | null;
+  offenAnzahl: number;
+}
+
+const zeilen: MitarbeiterZeile[] = mitarbeiterListe.map((m) => {
+  const zellen: Zelle[] = fortbildungen.map((f) => {
     const status = statusMap.get(`${m.id}:${f.id}`);
     if (!status) {
-      zeilen.push({
-        mitarbeiterName: m.name,
-        fobiTitel: f.titel,
-        mitarbeiterId: m.id,
-        fobiId: f.id,
-        zustand: 'offen',
-        hinweis: 'Noch nie gemacht',
-      });
-      continue;
+      return { fobiId: f.id, fobiTitel: f.titel, zustand: 'offen' as const, tooltip: 'Noch nie gemacht', faelligAb: null };
     }
     const faelligAb = faelligkeitsDatum(status.zuletztBestandenAm, f.gueltigkeitMonate);
     const bestandenDatum = new Date(status.zuletztBestandenAm).toLocaleDateString('de-DE');
     if (Date.now() >= faelligAb) {
-      zeilen.push({
-        mitarbeiterName: m.name,
-        fobiTitel: f.titel,
-        mitarbeiterId: m.id,
+      return {
         fobiId: f.id,
-        zustand: 'faellig',
-        hinweis: `Zuletzt bestanden am ${bestandenDatum} — Auffrischung fällig`,
-      });
-    } else {
-      const faelligDatum = new Date(faelligAb).toLocaleDateString('de-DE');
-      zeilen.push({
-        mitarbeiterName: m.name,
         fobiTitel: f.titel,
-        mitarbeiterId: m.id,
-        fobiId: f.id,
-        zustand: 'bestanden',
-        hinweis: `Bestanden am ${bestandenDatum} — fällig ab ${faelligDatum}`,
-      });
+        zustand: 'faellig' as const,
+        tooltip: `Zuletzt bestanden am ${bestandenDatum} — Auffrischung fällig seit ${new Date(faelligAb).toLocaleDateString('de-DE')}`,
+        faelligAb,
+      };
     }
-  }
-}
+    return {
+      fobiId: f.id,
+      fobiTitel: f.titel,
+      zustand: 'bestanden' as const,
+      tooltip: `Bestanden am ${bestandenDatum} — nächste Auffrischung ab ${new Date(faelligAb).toLocaleDateString('de-DE')}`,
+      faelligAb,
+    };
+  });
 
-// Dringendste zuerst: fällig (überfällig) vor offen (nie gemacht) vor bestanden (aktuell).
-const ZUSTAND_PRIORITAET: Record<Zeile['zustand'], number> = { faellig: 0, offen: 1, bestanden: 2 };
-zeilen.sort((a, b) => {
-  const prio = ZUSTAND_PRIORITAET[a.zustand] - ZUSTAND_PRIORITAET[b.zustand];
-  return prio !== 0 ? prio : a.mitarbeiterName.localeCompare(b.mitarbeiterName, 'de');
+  const bekannteFaelligkeiten = zellen.filter(
+    (z): z is Zelle & { faelligAb: number } => z.faelligAb !== null
+  );
+  const naechste = [...bekannteFaelligkeiten].sort((a, b) => a.faelligAb - b.faelligAb)[0];
+  const offenAnzahl = zellen.filter((z) => z.zustand === 'offen').length;
+
+  return {
+    mitarbeiterId: m.id,
+    name: m.name,
+    zellen,
+    naechsteAuffrischung: naechste ? { datum: naechste.faelligAb, ueberfaellig: naechste.zustand === 'faellig', fobiTitel: naechste.fobiTitel } : null,
+    offenAnzahl,
+  };
 });
 
-const anzahlOffen = zeilen.filter((z) => z.zustand === 'offen').length;
-const anzahlFaellig = zeilen.filter((z) => z.zustand === 'faellig').length;
-const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
+const anzahlOffenGesamt = zeilen.reduce((sum, z) => sum + z.offenAnzahl, 0);
+const anzahlFaelligGesamt = zeilen.reduce((sum, z) => sum + z.zellen.filter((c) => c.zustand === 'faellig').length, 0);
+const anzahlAktuellGesamt = zeilen.reduce((sum, z) => sum + z.zellen.filter((c) => c.zustand === 'bestanden').length, 0);
+const gesamtAnzahlZellen = zeilen.length * fortbildungen.length;
+
+const ersterMitarbeiter = mitarbeiterListe[0];
+const anfangsLink = ersterMitarbeiter ? statusLink(ersterMitarbeiter.id, STATUS_LINK_SECRET) : '';
 ---
 
 <BaseLayout title="Pflicht-Fortbildungen" noindex>
-  <div class="container prose article">
-    <h1>Pflicht-Fortbildungen</h1>
-    <p class="lead muted">
-      Übersicht, wer welche Pflicht-Fortbildung absolviert hat, und Versand neuer Zugangslinks per
-      Mail. Admin-Bereich mit eigenem Passwort, getrennt vom normalen Mitarbeiter-Login – so sieht
-      nicht jede Person mit dem geteilten Mitarbeiter-Passwort die Nachweise aller Kolleg:innen.
-      Der Test selbst läuft über einen persönlichen Link außerhalb des Mitarbeiter-Logins.
-    </p>
+  <div class="container article">
+    <div class="prose">
+      <h1>Pflicht-Fortbildungen</h1>
+      <p class="lead muted">
+        Übersicht, wer welche Pflicht-Fortbildung absolviert hat, und Versand neuer Zugangslinks per
+        Mail. Admin-Bereich mit eigenem Passwort, getrennt vom normalen Mitarbeiter-Login – so sieht
+        nicht jede Person mit dem geteilten Mitarbeiter-Passwort die Nachweise aller Kolleg:innen.
+        Der Test selbst läuft über einen persönlichen Link außerhalb des Mitarbeiter-Logins.
+      </p>
 
-    {ladeFehler && (
-      <div class="notice">
-        <strong>Status konnte nicht geladen werden.</strong>
-        <p style="margin-bottom:0">{ladeFehler}</p>
-      </div>
-    )}
+      {ladeFehler && (
+        <div class="notice">
+          <strong>Status konnte nicht geladen werden.</strong>
+          <p style="margin-bottom:0">{ladeFehler}</p>
+        </div>
+      )}
+    </div>
 
-    <div class="tool-box">
+    <div class="tool-box tool-box-wide">
       <div class="status-head">
         <h2>Status</h2>
         {zeilen.length > 0 && (
           <button type="button" id="csv-export" class="btn btn-secondary">Als CSV exportieren</button>
         )}
       </div>
-      {zeilen.length > 0 && (
+      {gesamtAnzahlZellen > 0 && (
         <p class="small muted status-summary">
-          <strong>{anzahlFaellig + anzahlOffen}</strong> von {zeilen.length} brauchen Aktion
-          ({anzahlFaellig} fällig zur Auffrischung, {anzahlOffen} noch nie gemacht) ·{' '}
-          {anzahlAktuell} aktuell
+          <strong>{anzahlFaelligGesamt + anzahlOffenGesamt}</strong> von {gesamtAnzahlZellen} brauchen Aktion
+          ({anzahlFaelligGesamt} fällig zur Auffrischung, {anzahlOffenGesamt} noch nie gemacht) ·{' '}
+          {anzahlAktuellGesamt} aktuell
         </p>
       )}
-      {zeilen.length === 0 ? (
+      {zeilen.length === 0 || fortbildungen.length === 0 ? (
         <p class="small muted">
           Noch keine Mitarbeiter oder Fortbildungen hinterlegt (<code>src/data/mitarbeiter.ts</code>,{' '}
           <code>src/data/fortbildungen.ts</code>).
         </p>
       ) : (
-        <table class="status-tabelle">
-          <thead>
-            <tr>
-              <th>Mitarbeiter</th>
-              <th>Fortbildung</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {zeilen.map((z) => (
+        <div class="table-scroll">
+          <table class="status-tabelle status-matrix">
+            <thead>
               <tr>
-                <td>{z.mitarbeiterName}</td>
-                <td>{z.fobiTitel}</td>
-                <td>
-                  <span class={`badge badge-${z.zustand}`}>
-                    {z.zustand === 'bestanden' ? 'Aktuell' : z.zustand === 'faellig' ? 'Fällig' : 'Offen'}
-                  </span>
-                  <p class="small muted" style="margin:.25rem 0 0">{z.hinweis}</p>
-                </td>
+                <th>Mitarbeiter</th>
+                {fortbildungen.map((f) => <th>{f.titel}</th>)}
+                <th>Nächste Auffrischung nötig am</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {zeilen.map((z) => (
+                <tr>
+                  <td>{z.name}</td>
+                  {z.zellen.map((c) => (
+                    <td class="status-zelle">
+                      <span
+                        class={`status-check status-check-${c.zustand}`}
+                        title={c.tooltip}
+                        aria-label={`${c.fobiTitel}: ${c.tooltip}`}
+                      >
+                        {c.zustand === 'bestanden' ? '✓' : c.zustand === 'faellig' ? '!' : '✗'}
+                      </span>
+                    </td>
+                  ))}
+                  <td>
+                    {z.naechsteAuffrischung ? (
+                      <span
+                        class={z.naechsteAuffrischung.ueberfaellig ? 'text-faellig' : ''}
+                        title={`${z.naechsteAuffrischung.fobiTitel} — ${z.naechsteAuffrischung.ueberfaellig ? 'fällig seit' : 'fällig ab'} ${new Date(z.naechsteAuffrischung.datum).toLocaleDateString('de-DE')}`}
+                        style="cursor:help"
+                      >
+                        {new Date(z.naechsteAuffrischung.datum).toLocaleDateString('de-DE')}
+                        {z.naechsteAuffrischung.ueberfaellig ? ' (überfällig)' : ''}
+                      </span>
+                    ) : (
+                      <span class="muted small">–</span>
+                    )}
+                    {z.offenAnzahl > 0 && (
+                      <p class="small muted" style="margin:.25rem 0 0">
+                        {z.offenAnzahl} Fortbildung{z.offenAnzahl > 1 ? 'en' : ''} noch nie gemacht
+                      </p>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
 
-    <div class="tool-box">
-      <h2>Zugangslink senden</h2>
-      <p class="small muted" style="margin-top:0">
-        Verschickt einen persönlichen Test-Link per Mail. Die automatische Jahres-Erinnerung läuft
-        separat, dieses Formular ist für den Erstversand oder manuelles Nachschicken.
+    <div class="prose">
+      <div class="tool-box">
+        <h2>Zugangslink senden</h2>
+        <p class="small muted" style="margin-top:0">
+          Verschickt einen persönlichen Test-Link per Mail. Die automatische Jahres-Erinnerung läuft
+          separat, dieses Formular ist für den Erstversand oder manuelles Nachschicken.
+        </p>
+        <form id="versand-form">
+          <div class="field">
+            <label for="mitarbeiterId">Mitarbeiter</label>
+            <select id="mitarbeiterId" name="mitarbeiterId" required>
+              {mitarbeiterListe.map((m) => (
+                <option value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
+          <div class="field">
+            <label for="fobiId">Fortbildung</label>
+            <select id="fobiId" name="fobiId" required>
+              {fortbildungen.map((f) => (
+                <option value={f.id}>{f.titel}</option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" class="btn">Link senden</button>
+        </form>
+        <p id="versand-ergebnis" class="small" hidden></p>
+      </div>
+
+      <div class="tool-box">
+        <h2>Persönlicher Status-Link</h2>
+        <p class="small muted" style="margin-top:0">
+          Jede Mitarbeiter:in bekommt ihren eigenen Link automatisch mit jeder Zugangs-/Erinnerungsmail
+          zugeschickt. Hier zum gezielten Nachschlagen für eine einzelne Person (z. B. beim Onboarding),
+          ohne die Links aller Kolleg:innen auf einen Blick zu zeigen.
+        </p>
+        {mitarbeiterListe.length === 0 ? (
+          <p class="small muted">Noch keine Mitarbeiter hinterlegt (<code>src/data/mitarbeiter.ts</code>).</p>
+        ) : (
+          <>
+            <div class="field">
+              <label for="statusLinkMitarbeiter">Mitarbeiter</label>
+              <select id="statusLinkMitarbeiter">
+                {mitarbeiterListe.map((m) => (
+                  <option value={m.id} data-link={statusLink(m.id, STATUS_LINK_SECRET)}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div class="status-link-anzeige">
+              <input
+                type="text"
+                readonly
+                id="statusLinkFeld"
+                value={anfangsLink}
+                onclick="this.select()"
+                class="status-link-feld"
+              />
+              <button type="button" id="statusLinkKopieren" class="btn btn-secondary">Kopieren</button>
+            </div>
+            <p id="statusLinkKopiertHinweis" class="small muted" hidden></p>
+          </>
+        )}
+      </div>
+
+      <p>
+        <a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a>
       </p>
-      <form id="versand-form">
-        <div class="field">
-          <label for="mitarbeiterId">Mitarbeiter</label>
-          <select id="mitarbeiterId" name="mitarbeiterId" required>
-            {mitarbeiterListe.map((m) => (
-              <option value={m.id}>{m.name}</option>
-            ))}
-          </select>
-        </div>
-        <div class="field">
-          <label for="fobiId">Fortbildung</label>
-          <select id="fobiId" name="fobiId" required>
-            {fortbildungen.map((f) => (
-              <option value={f.id}>{f.titel}</option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" class="btn">Link senden</button>
+      <form method="POST" action="/mitarbeiter/fortbildungen/logout">
+        <button type="submit" class="btn btn-secondary">Admin abmelden</button>
       </form>
-      <p id="versand-ergebnis" class="small" hidden></p>
     </div>
-
-    <div class="tool-box">
-      <h2>Persönliche Status-Links</h2>
-      <p class="small muted" style="margin-top:0">
-        Jede Mitarbeiter:in bekommt ihren eigenen Link automatisch mit jeder Zugangs-/Erinnerungsmail
-        zugeschickt. Hier zum manuellen Weitergeben (z. B. beim Onboarding), ohne diese Übersicht zu
-        teilen.
-      </p>
-      <ul class="status-link-liste">
-        {mitarbeiterListe.map((m) => (
-          <li>
-            <span class="status-link-name">{m.name}</span>
-            <input
-              type="text"
-              readonly
-              value={statusLink(m.id, STATUS_LINK_SECRET)}
-              onclick="this.select()"
-              class="status-link-feld"
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <p>
-      <a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a>
-    </p>
-    <form method="POST" action="/mitarbeiter/fortbildungen/logout">
-      <button type="submit" class="btn btn-secondary">Admin abmelden</button>
-    </form>
   </div>
 </BaseLayout>
 
@@ -207,6 +253,9 @@ const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
   }
   .tool-box h2 {
     margin-top: 0;
+  }
+  .tool-box-wide {
+    max-width: none;
   }
   .status-head {
     display: flex;
@@ -222,6 +271,9 @@ const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
   .status-summary {
     margin: 0 0 1.25rem;
   }
+  .table-scroll {
+    overflow-x: auto;
+  }
   .status-tabelle {
     width: 100%;
     border-collapse: collapse;
@@ -231,37 +283,48 @@ const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
     text-align: left;
     padding: 0.6rem 0.75rem;
     border-bottom: 1px solid var(--color-border);
-    vertical-align: top;
+    vertical-align: middle;
+    white-space: nowrap;
   }
-  .badge-bestanden {
+  .status-matrix th:first-child,
+  .status-matrix td:first-child {
+    white-space: normal;
+  }
+  .status-zelle {
+    text-align: center;
+  }
+  .status-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    font-weight: 700;
+    cursor: help;
+  }
+  .status-check-bestanden {
     background: #2e7d32;
     color: #fff;
   }
-  .badge-faellig {
+  .status-check-faellig {
     background: #b3261e;
     color: #fff;
   }
-  .badge-offen {
+  .status-check-offen {
     background: var(--color-surface);
-    color: inherit;
+    color: var(--color-muted, inherit);
+    border: 1px solid var(--color-border);
   }
-  .status-link-liste {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
+  .text-faellig {
+    color: #b3261e;
+    font-weight: 600;
   }
-  .status-link-liste li {
+  .status-link-anzeige {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.6rem;
-  }
-  .status-link-name {
-    font-weight: 600;
-    min-width: 10rem;
   }
   .status-link-feld {
     flex: 1 1 16rem;
@@ -312,17 +375,24 @@ const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
   const csvBtn = document.getElementById('csv-export');
   if (csvBtn) {
     csvBtn.addEventListener('click', () => {
-      const rows = Array.from(document.querySelectorAll('.status-tabelle tbody tr'));
+      const table = document.querySelector('.status-tabelle') as HTMLTableElement;
       const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
-      const zeilen = rows.map((row) => {
-        const cells = row.querySelectorAll('td');
-        const mitarbeiter = cells[0]?.textContent?.trim() ?? '';
-        const fobi = cells[1]?.textContent?.trim() ?? '';
-        const badge = cells[2]?.querySelector('.badge')?.textContent?.trim() ?? '';
-        const hinweis = cells[2]?.querySelector('p')?.textContent?.trim() ?? '';
-        return [mitarbeiter, fobi, badge, hinweis].map(escape).join(';');
+      const headerCells = Array.from(table.querySelectorAll('thead th')).map(
+        (th) => th.textContent?.trim() ?? ''
+      );
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const csvZeilen = rows.map((row) => {
+        const cells = Array.from(row.children);
+        const werte = cells.map((cell, i) => {
+          if (i === 0 || i === cells.length - 1) {
+            return cell.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+          }
+          const check = cell.querySelector('.status-check');
+          return check?.getAttribute('title') ?? '';
+        });
+        return werte.map(escape).join(';');
       });
-      const csv = '\uFEFF' + ['Mitarbeiter;Fortbildung;Status;Hinweis', ...zeilen].join('\r\n');
+      const csv = '﻿' + [headerCells.map(escape).join(';'), ...csvZeilen].join('\r\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -332,6 +402,37 @@ const anzahlAktuell = zeilen.filter((z) => z.zustand === 'bestanden').length;
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+    });
+  }
+
+  const statusLinkSelect = document.getElementById('statusLinkMitarbeiter') as HTMLSelectElement | null;
+  const statusLinkFeld = document.getElementById('statusLinkFeld') as HTMLInputElement | null;
+  const statusLinkKopieren = document.getElementById('statusLinkKopieren') as HTMLButtonElement | null;
+  const statusLinkHinweis = document.getElementById('statusLinkKopiertHinweis') as HTMLParagraphElement | null;
+
+  if (statusLinkSelect && statusLinkFeld) {
+    statusLinkSelect.addEventListener('change', () => {
+      const option = statusLinkSelect.selectedOptions[0] as HTMLOptionElement | undefined;
+      statusLinkFeld.value = option?.dataset.link ?? '';
+      if (statusLinkHinweis) statusLinkHinweis.hidden = true;
+    });
+  }
+
+  if (statusLinkKopieren && statusLinkFeld) {
+    statusLinkKopieren.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(statusLinkFeld.value);
+        if (statusLinkHinweis) {
+          statusLinkHinweis.hidden = false;
+          statusLinkHinweis.textContent = 'Kopiert!';
+        }
+      } catch {
+        statusLinkFeld.select();
+        if (statusLinkHinweis) {
+          statusLinkHinweis.hidden = false;
+          statusLinkHinweis.textContent = 'Konnte nicht automatisch kopiert werden – Feld ist markiert, Strg+C.';
+        }
+      }
     });
   }
 </script>

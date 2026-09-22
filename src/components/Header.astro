@@ -3,13 +3,23 @@ import { SITE_TITLE, NAV_LINKS } from '../consts';
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path.startsWith(href.replace(/\/$/, ''));
+
+// Talk-Link nur als zusätzliche Registerkarte im Mitarbeiterbereich, direkt neben Impressum –
+// nicht in der öffentlichen Navigation, deshalb hier lokal statt in consts.ts eingefügt.
+const isMitarbeiterbereich = path.startsWith('/mitarbeiter');
+const TALK_URL = 'https://cloud.ptv-euregio.de/index.php/apps/spreed';
+
+const navLinks = isMitarbeiterbereich
+  ? [...NAV_LINKS.slice(0, -1), { href: TALK_URL, label: 'Talk', external: true }, NAV_LINKS[NAV_LINKS.length - 1]]
+  : NAV_LINKS.map((l) => ({ ...l, external: false }));
 ---
 
 <header class="site-header">
   <div class="container header-inner">
     <a href="/" class="brand" aria-label={`${SITE_TITLE} Startseite`}>
-      <span class="brand-mark" aria-hidden="true">EH</span>
-      <span class="brand-name">{SITE_TITLE}</span>
+      <!-- TESTLAUF: PTV-Euregio-Logo statt EH-Kompass-Wortmarke. Alte Variante: siehe Git-Historie
+           bzw. Chat-Verlauf, falls das wieder raus soll. -->
+      <img src="/ptv-euregio-logo.png" alt="" class="brand-logo" width="737" height="294" />
     </a>
 
     <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true" />
@@ -20,9 +30,14 @@ const isActive = (href: string) =>
     <nav class="site-nav" aria-label="Hauptnavigation">
       <ul>
         {
-          NAV_LINKS.map((link) => (
+          navLinks.map((link) => (
             <li>
-              <a href={link.href} aria-current={isActive(link.href) ? 'page' : undefined}>
+              <a
+                href={link.href}
+                aria-current={!link.external && isActive(link.href) ? 'page' : undefined}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noopener' : undefined}
+              >
                 {link.label}
                 {link.href === '/shop/' && (
                   <span id="warenkorb-badge" class="cart-badge" hidden>
@@ -72,6 +87,11 @@ const isActive = (href: string) =>
     color: var(--color-text);
     font-weight: 700;
     font-size: 1.15rem;
+  }
+  .brand-logo {
+    display: block;
+    height: 2.25rem;
+    width: auto;
   }
   .brand-mark {
     background: var(--color-primary);

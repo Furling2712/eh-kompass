@@ -1,0 +1,24 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const TALK_URL = 'https://cloud.ptv-euregio.de/index.php/apps/spreed';
+---
+
+<BaseLayout title="Talk" noindex>
+  <div class="container prose article">
+    <h1>Talk</h1>
+    <p class="lead muted">Team-Chat und Videocalls über Nextcloud Talk.</p>
+
+    <p><a href={TALK_URL} class="btn" target="_blank" rel="noopener">Zu Talk →</a></p>
+
+    <p><a href="/mitarbeiter/" class="btn btn-secondary">← Zurück zum Mitarbeiterbereich</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: 2.5rem 1rem;
+  }
+</style>

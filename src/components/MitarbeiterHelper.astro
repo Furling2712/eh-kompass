@@ -6,6 +6,10 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
 ---
 
 <div class="helper" id="mh-helper" data-open="false" data-tour={tourJson}>
+  <p id="mh-helper-callout" class="helper-callout" aria-hidden="true">
+    Du brauchst Hilfe?<br />Klick mich!
+  </p>
+
   <button
     type="button"
     id="mh-helper-toggle"
@@ -69,6 +73,62 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
     right: 1.25rem;
     bottom: 1.25rem;
     z-index: 130;
+  }
+
+  /* Wie beim Klienten-Helfer: Hinweis bleibt dauerhaft sichtbar (nur ausgeblendet, während das
+     Panel offen ist), damit Mitarbeitende ihn immer wiederfinden statt dass er nach dem ersten
+     Klick für immer verschwindet. */
+  .helper-callout {
+    position: absolute;
+    right: 0;
+    bottom: 7.1rem;
+    margin: 0;
+    width: 6.5rem;
+    padding: 0.4rem 0.55rem;
+    background: #fff;
+    color: #2b2117;
+    border-radius: 0.8rem 0.8rem 0.2rem 0.8rem;
+    box-shadow: var(--shadow);
+    font-family: 'Segoe Script', 'Bradley Hand', 'Comic Sans MS', cursive;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    text-align: center;
+    transform: rotate(-3deg);
+    transform-origin: bottom right;
+    pointer-events: none;
+    animation: helper-callout-bounce 2.4s ease-in-out infinite;
+  }
+
+  .helper-callout::after {
+    content: '';
+    position: absolute;
+    right: 0.75rem;
+    bottom: -0.35rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    background: inherit;
+    clip-path: polygon(0 0, 100% 0, 40% 100%);
+  }
+
+  .helper[data-open='true'] .helper-callout {
+    display: none;
+  }
+
+  @keyframes helper-callout-bounce {
+    0%, 100% {
+      transform: rotate(-3deg) translateY(0);
+    }
+    50% {
+      transform: rotate(-3deg) translateY(-4px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .helper-callout {
+      width: 5.8rem;
+      font-size: 0.7rem;
+      bottom: 6.8rem;
+    }
   }
 
   .helper-toggle {
@@ -297,6 +357,9 @@ const tourJson = tip.tour && tip.tour.length > 0 ? JSON.stringify(tip.tour) : un
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .helper-callout {
+      animation: none;
+    }
     .dennis-idle-wrap {
       animation: none;
     }

@@ -19,3 +19,6 @@ pnpm-debug.log*
 
 # Local Netlify folder
 .netlify
+
+# Claude Code lokale Einstellungen
+.claude/
