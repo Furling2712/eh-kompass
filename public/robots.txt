@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /mitarbeiter/
 
-Sitemap: https://eh-kompass.de/sitemap-index.xml
+Sitemap: https://eh-kompass.netlify.app/sitemap-index.xml

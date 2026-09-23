@@ -4,9 +4,10 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import netlify from '@astrojs/netlify';
 
-// Basis-URL der späteren Produktivseite. Vor dem Launch auf die echte Domain setzen.
+// Basis-URL: aktuell die Netlify-URL, bis die PTV-Euregio-Subdomain (eh-kompass.ptv-euregio.de,
+// DNS noch offen) eingerichtet ist. Dann hier und in public/robots.txt umstellen.
 export default defineConfig({
-  site: 'https://eh-kompass.de',
+  site: 'https://eh-kompass.netlify.app',
   integrations: [mdx(), sitemap()],
   // Adapter für den passwortgeschützten Mitarbeiterbereich (server-seitig gerendert).
   // Die öffentlichen Seiten bleiben statisch, da `output` nicht auf 'server' gesetzt ist.
