@@ -147,7 +147,7 @@ export const helperTips: HelperTip[] = [
   // --- Für andere BeWo-Anbieter ---
   {
     pathPrefix: '/bewo-anbieter',
-    message: 'Ein Überblick für andere BeWo-Träger: BEI-Generierung, Therapiematerialien und ein Feedback-Formular.',
+    message: 'Ein Überblick für andere BeWo-Träger: Therapiematerialien und ein Feedback-Formular.',
   },
 
   // --- BEI-Generierung ---
@@ -161,28 +161,8 @@ export const helperTips: HelperTip[] = [
   },
   {
     pathPrefix: '/bei-generierung',
-    message: 'Unterstützung bei der BEI-Generierung für andere BeWo-Anbieter.',
-  },
-  {
-    pathPrefix: '/bei-generierung',
     exact: true,
-    message: 'Unterstützung bei der BEI-Generierung für andere BeWo-Anbieter.',
-    tour: [
-      {
-        selector: '#bei-produkt',
-        message:
-          'So funktioniert\'s: Formular online ausfüllen, wir liefern dir eine fertig formulierte Vorlage für den Hilfeplan.',
-      },
-      {
-        selector: '#bei-lizenzen',
-        message:
-          'Für Träger und Teams gibt es Lizenzpakete zum Vorzugspreis, wenn mehrere Zugänge gebraucht werden.',
-      },
-      {
-        selector: '#bei-datenschutz-hinweis',
-        message: 'Deine Angaben bleiben im Browser – es gibt keine automatische Übertragung an uns oder Dritte.',
-      },
-    ],
+    message: 'Die BEI-Generierung ist bald verfügbar, sobald der Bestellprozess eingerichtet ist.',
   },
 
   // --- Shop ---
