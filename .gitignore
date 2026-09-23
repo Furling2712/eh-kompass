@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # Claude Code lokale Einstellungen
 .claude/
+
+# Interne/sensible Projektnotizen (Sicherheit, Kosten, Vorfälle) - nicht öffentlich
+CLAUDE.local.md
