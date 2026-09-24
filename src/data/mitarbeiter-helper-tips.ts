@@ -15,11 +15,6 @@ export const mitarbeiterHelperTips: HelperTip[] = [
     message: 'Willkommen im Mitarbeiterbereich! Hier findest du alles, was du für die Arbeit brauchst.',
     tour: [
       {
-        selector: '#dash-systemtherapie',
-        message:
-          'Im Aufbau, aber schon jetzt einen Blick wert: systemtherapeutische Methoden für die Arbeit mit Klient:innen.',
-      },
-      {
         selector: '#dash-pflicht',
         message: 'Diese Bereiche sind für alle Mitarbeiter:innen verpflichtend – am besten zuerst durchgehen.',
       },
