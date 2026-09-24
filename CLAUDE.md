@@ -45,3 +45,13 @@ Bereits recherchierte Ideen (siehe Chat-Verlauf für Details/Begründung je Meth
 von `src/data/shop-produkte.ts` entwerfen (id, name, beschreibung, details[], preis, bild,
 kategorie, kategorieSlug, lieferzeit, anbieter — Vorbild: bestehender Eintrag "aufstellungsbrett").
 Noch offen: welche Ideen Alex priorisiert, Bildmaterial fehlt noch (Platzhalter nötig).
+
+## Vor Launch ausgeblendet — später genau so wiederherstellen (Stand 24.09.2026)
+Folgendes ist nur aus Navigation/Dashboard entfernt, die Seiten selbst liegen unverändert im Code
+und werden später **1:1** wieder gebraucht:
+- Reiter „Für andere BeWo-Anbieter" in der Hauptnavigation (`src/consts.ts`) — Commit `20281bb`
+- Karte „Systemtherapeutische Methoden" im Mitarbeiter-Dashboard (`src/pages/mitarbeiter/index.astro`)
+  inkl. Rundgang-Schritt `#dash-systemtherapie` (`src/data/mitarbeiter-helper-tips.ts`) — Commit `11ae0ed`
+
+Wiederherstellen: `git revert 11ae0ed 20281bb`. Letzter Stand mit beidem ist zusätzlich als Git-Tag
+`vor-launch-ausgeblendet` markiert.
