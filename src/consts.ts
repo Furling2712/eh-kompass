@@ -11,7 +11,6 @@ export const NAV_LINKS = [
   { href: '/notfallzimmer/', label: 'Notfallzimmer' },
   { href: '/glossar/', label: 'Wörterbuch' },
   { href: '/online-bewo/', label: 'Online-BeWo' },
-  { href: '/bewo-anbieter/', label: 'Für andere BeWo-Anbieter' },
   { href: '/impressum', label: 'Impressum' },
 ];
 
